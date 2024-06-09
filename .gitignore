@@ -1,0 +1,11 @@
+data/example/**
+
+data/scene/**
+
+data/temp/**
+
+flagged/**
+
+.idea/**
+
+.vscode/**
