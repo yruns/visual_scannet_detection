@@ -1,7 +1,5 @@
-import gradio as gr
+import os.path
 
-from utils import agent
-from utils.constants import background_color, bbox_color, bbox_line_width, examples_path, camera_position
 from utils.web import get_examples
 from web.function import *
 
@@ -45,8 +43,8 @@ with gr.Blocks() as demo:
                                 bbox_line_width_slider = gr.Slider(minimum=0.01, maximum=0.1,
                                                                    value=bbox_line_width, label="Bbox Line Width",
                                                                    scale=4)
-                                download_button = gr.DownloadButton(label="Download Scene", scale=1)
-
+                                download_button = gr.DownloadButton(label="Download Scene", scale=1,
+                                                                    value=agent.original_scene_path)
 
                             with gr.Row():
                                 with gr.Tabs(selected=0):
@@ -54,6 +52,17 @@ with gr.Blocks() as demo:
                                         # bbox表格
                                         bbox_text = gr.Textbox(label="Bbox Table", lines=5, scale=5,
                                                                placeholder="bbox, eg. [ 1.48  3.52  1.85  1.74 0.231  0.572 ]")
+                                        with gr.Accordion(label="Examples for Textbox:", open=False):
+                                            bbox_table_example = gr.Examples(
+                                                examples=[
+                                                    ["[ 1.48  3.52  1.85  1.74 0.231  0.572 ]"],
+                                                    ["[[ 1.14655101e+00  2.19867110e+00  6.16495669e-01  \
+                                                        5.41841269e-01\n2.53463078e+00  1.21447623e+00]\n[ 2.91681337e+00\
+                                                          2.50163722e+00  9.72237706e-01  6.16974354e-01\n1.84280431e+00\
+                                                            2.86974430e-01]]"],
+                                                ],
+                                                inputs=bbox_text,
+                                            )
                                     with gr.Tab("Table"):
                                         # bbox表格
                                         bbox_table = gr.Dataframe(
@@ -64,14 +73,32 @@ with gr.Blocks() as demo:
                                             label="Bbox Table",
                                             scale=5,
                                         )
-
-                                # bbox文件上传
-                                bbox_numpy_file = gr.File(label="Upload Bbox(only support .npy file)", type="filepath",
-                                                          scale=1)
-                                # axis-aligned matrix上传
-                                axis_aligned_matrix_file = gr.File(
-                                    label="Upload Axis-Aligned Matrix(only support .txt file)", type="filepath",
-                                    scale=1)
+                                with gr.Column():
+                                    # bbox文件上传
+                                    bbox_numpy_file = gr.File(label="Upload Bbox(only support .npy file)", type="filepath",
+                                                              scale=1)
+                                    with gr.Accordion(label="Examples for bbox numpy file:", open=False):
+                                        gr.Examples(
+                                            examples=[
+                                                choice.replace("vh_clean_2.obj", "aligned_bbox.npy").replace(prettify_prefix, "")
+                                                for choice in scene_choice
+                                            ],
+                                            inputs=bbox_numpy_file,
+                                        )
+                                with gr.Column():
+                                    # axis-aligned matrix上传
+                                    axis_aligned_matrix_file = gr.File(
+                                        label="Upload Axis-Aligned Matrix(only support .txt file)", type="filepath",
+                                        scale=1)
+                                    with gr.Accordion(label="Examples for axis align matrix:", open=False):
+                                        gr.Examples(
+                                            examples=[
+                                                choice.replace("_vh_clean_2.obj", ".txt").replace(
+                                                    prettify_prefix, "")
+                                                for choice in scene_choice
+                                            ],
+                                            inputs=axis_aligned_matrix_file,
+                                        )
 
                             with gr.Row():
                                 submit_button = gr.Button(value="Submit", scale=1, variant="primary")
@@ -126,7 +153,7 @@ with gr.Blocks() as demo:
     tab1_dropdown_scene.change(
         fn=select_scene,
         inputs=[tab1_dropdown_scene],
-        outputs=[model_3d],
+        outputs=[model_3d, download_button],
     )
 
     # 提交按钮
@@ -134,45 +161,45 @@ with gr.Blocks() as demo:
         fn=submit_bbox_params,
         inputs=[bbox_color_picker, bbox_line_width_slider,
                 bbox_numpy_file, axis_aligned_matrix_file, bbox_text, bbox_table],
-        outputs=[model_3d],
+        outputs=[model_3d, download_button],
     )
 
     submit_button2.click(
         fn=submit_bbox_params,
         inputs=[bbox_color_picker2, bbox_line_width_slider2,
                 bbox_numpy_file2, axis_aligned_matrix_file2, bbox_text2, bbox_table2],
-        outputs=[model_display],
+        outputs=[model_display, download_button2],
     )
 
     # 清除按钮
     clear_button.click(
         fn=clear_bbox_params_btn_tab1,
         inputs=[],
-        outputs=[model_3d, bbox_color_picker, bbox_line_width_slider,
+        outputs=[model_3d, download_button, bbox_color_picker, bbox_line_width_slider,
                  bbox_numpy_file, axis_aligned_matrix_file, bbox_text, bbox_table],
     )
 
     clear_button2.click(
         fn=clear_bbox_params_btn_tab2,
         inputs=[],
-        outputs=[model_display, bbox_color_picker2, bbox_line_width_slider2,
+        outputs=[model_display, download_button2, bbox_color_picker2, bbox_line_width_slider2,
                  bbox_numpy_file2, axis_aligned_matrix_file2, bbox_text2, bbox_table2],
     )
 
     download_button.click(
         fn=download_scene,
-        inputs=[model_3d],
+        inputs=[model_3d, download_button],
         outputs=[download_button]
     )
 
     download_button2.click(
         fn=download_scene,
-        inputs=[model_display],
+        inputs=[model_display, download_button2],
         outputs=[download_button2]
     )
 
     model_display.change(
         fn=upload_scene,
         inputs=[model_display],
-        outputs=[model_display],
+        outputs=[model_display, download_button2],
     )

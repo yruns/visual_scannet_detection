@@ -18,7 +18,7 @@ def select_scene(scene_name):
     agent.original_scene_path = scene_name
 
     return (
-        scene_name
+        scene_name, scene_name
     )
 
 
@@ -32,25 +32,25 @@ def upload_scene(scene_file):
         scene_file = os.path.join(temp_path, os.path.basename(scene_file))
         print("Uploaded scene file:", scene_file)
         agent.add_temp_file(TempFile(scene_file))
-        agent.upload_scene_path = scene_file
 
         if scene_file.endswith('.ply'):
             scene_file, prettify_file = ply_to_obj(scene_file, prettify_gradio=True)
             agent.add_temp_file(TempFile(scene_file))
             agent.add_temp_file(TempFile(prettify_file))
-            agent.upload_scene_path = prettify_file
 
+    agent.upload_scene_path = prettify_file if prettify_file is not None else scene_file
     return (
-        prettify_file if prettify_file is not None else scene_file
+        agent.upload_scene_path,
+        agent.upload_scene_path,
     )
 
-def download_scene(current_scene_path):
+def download_scene(current_scene_path, download_btn):
+    if download_btn is None:
+        gr.Warning("Now there is no scene to download.")
     print("Downloaded scene file:", current_scene_path)
     return (
         current_scene_path
     )
-
-
 
 
 def submit_bbox_params(bbox_color, bbox_line_width,
@@ -104,13 +104,14 @@ def submit_bbox_params(bbox_color, bbox_line_width,
     )
 
     return (
-        new_scene_path
+        new_scene_path, new_scene_path
     )
 
 
 def clear_bbox_params_btn_tab1():
     # 将所有参数重置为默认值, 并返回原始场景路径
     return (
+        agent.original_scene_path,
         agent.original_scene_path,
         bbox_color,
         bbox_line_width,
@@ -123,6 +124,7 @@ def clear_bbox_params_btn_tab1():
 def clear_bbox_params_btn_tab2():
     # 将所有参数重置为默认值, 并返回原始场景路径
     return (
+        agent.upload_scene_path,
         agent.upload_scene_path,
         bbox_color,
         bbox_line_width,
