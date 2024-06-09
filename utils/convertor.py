@@ -1,9 +1,9 @@
-import trimesh
-import os
 import open3d as o3d
-from utils.visual import prettify_mesh_for_gradio
-from utils.constants import prettify_prefix
+import trimesh
+
 from utils.comm import add_prefix
+from utils.constants import prettify_prefix
+from utils.visual import prettify_mesh_for_gradio
 
 
 def ply_to_obj(ply_file, obj_file=None, prettify_gradio=True):

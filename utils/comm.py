@@ -57,7 +57,7 @@ def generate_hash(*args):
 def process_2d_text_table(printed_array):
     # 将文本表格处理成列表
     # 用字符串处理函数将其转换为合适的形式
-    array_str = printed_array.replace('[', '').replace(']', '').replace('\n', '')
+    array_str = printed_array.replace('[', '').replace(']', '').replace('\n', '').replace(',', ' ')
     array_str = array_str.split()
 
     # 使用numpy.fromstring()创建NumPy数组
@@ -74,10 +74,12 @@ def has_prefix(text, prefix):
     basename = os.path.basename(text)
     return basename.startswith(prefix)
 
+
 def add_prefix(text, prefix):
     dirname = os.path.dirname(text)
     basename = os.path.basename(text)
     return os.path.join(dirname, f"{prefix}{basename}")
+
 
 def remove_prefix(text, prefix):
     dirname = os.path.dirname(text)

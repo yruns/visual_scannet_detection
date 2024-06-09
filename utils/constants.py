@@ -1,8 +1,12 @@
+import os
+
 # Tab1 example 文件夹路径
 examples_path = "data/example"
+os.makedirs(examples_path, exist_ok=True)
 
 # 临时文件夹路径
 temp_path = "data/temp"
+os.makedirs(temp_path, exist_ok=True)
 
 # gr.Model3D背景颜色
 background_color = (0.95, 0.95, 0.95, 1.0)

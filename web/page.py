@@ -3,7 +3,7 @@ import gradio as gr
 from utils import agent
 from utils.constants import background_color, bbox_color, bbox_line_width, examples_path, camera_position
 from utils.web import get_examples
-from web.function import select_scene, submit_bbox_params, clear_bbox_params, upload_scene
+from web.function import *
 
 # Global Variables
 scene_choice = get_examples()
@@ -45,6 +45,8 @@ with gr.Blocks() as demo:
                                 bbox_line_width_slider = gr.Slider(minimum=0.01, maximum=0.1,
                                                                    value=bbox_line_width, label="Bbox Line Width",
                                                                    scale=4)
+                                download_button = gr.DownloadButton(label="Download Scene", scale=1)
+
 
                             with gr.Row():
                                 with gr.Tabs(selected=0):
@@ -91,6 +93,7 @@ with gr.Blocks() as demo:
                     # bbox 线宽
                     bbox_line_width_slider2 = gr.Slider(minimum=0.01, maximum=0.1,
                                                         value=bbox_line_width, label="Bbox Line Width", scale=4)
+                    download_button2 = gr.DownloadButton(label="Download Scene", scale=1)
 
                 with gr.Row():
                     with gr.Tabs(selected=0):
@@ -143,17 +146,29 @@ with gr.Blocks() as demo:
 
     # 清除按钮
     clear_button.click(
-        fn=clear_bbox_params,
-        inputs=[model_3d],
+        fn=clear_bbox_params_btn_tab1,
+        inputs=[],
         outputs=[model_3d, bbox_color_picker, bbox_line_width_slider,
                  bbox_numpy_file, axis_aligned_matrix_file, bbox_text, bbox_table],
     )
 
     clear_button2.click(
-        fn=clear_bbox_params,
-        inputs=[model_display],
+        fn=clear_bbox_params_btn_tab2,
+        inputs=[],
         outputs=[model_display, bbox_color_picker2, bbox_line_width_slider2,
                  bbox_numpy_file2, axis_aligned_matrix_file2, bbox_text2, bbox_table2],
+    )
+
+    download_button.click(
+        fn=download_scene,
+        inputs=[model_3d],
+        outputs=[download_button]
+    )
+
+    download_button2.click(
+        fn=download_scene,
+        inputs=[model_display],
+        outputs=[download_button2]
     )
 
     model_display.change(

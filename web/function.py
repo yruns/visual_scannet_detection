@@ -2,6 +2,7 @@ import os
 import shutil
 
 import numpy as np
+import gradio as gr
 
 from utils import agent
 from utils.comm import TempFile
@@ -13,7 +14,7 @@ from utils.visual import create_scene_with_bbox
 
 def select_scene(scene_name):
     print("Selected scene:", scene_name)
-    scene_name = os.path.join(examples_path, scene_name, f"{scene_name}_vh_clean_2.obj")
+    scene_name = os.path.join(examples_path, scene_name, f"{prettify_prefix}{scene_name}_vh_clean_2.obj")
     agent.original_scene_path = scene_name
 
     return (
@@ -25,35 +26,31 @@ def upload_scene(scene_file):
     prettify_file = None
     if scene_file is not None and os.path.exists(scene_file):
         # 确保上传文件时才触发，删除文件时忽略
+        if os.path.exists(os.path.join(temp_path, os.path.basename(scene_file))):
+            os.remove(os.path.join(temp_path, os.path.basename(scene_file)))
         shutil.move(scene_file, temp_path)
         scene_file = os.path.join(temp_path, os.path.basename(scene_file))
         print("Uploaded scene file:", scene_file)
         agent.add_temp_file(TempFile(scene_file))
+        agent.upload_scene_path = scene_file
 
         if scene_file.endswith('.ply'):
             scene_file, prettify_file = ply_to_obj(scene_file, prettify_gradio=True)
             agent.add_temp_file(TempFile(scene_file))
             agent.add_temp_file(TempFile(prettify_file))
+            agent.upload_scene_path = prettify_file
 
     return (
         prettify_file if prettify_file is not None else scene_file
     )
 
-
-def change_bbox_line_width(current_scene_path, bbox_line_width):
-    print("Change bbox line width to:", bbox_line_width)
-
+def download_scene(current_scene_path):
+    print("Downloaded scene file:", current_scene_path)
     return (
         current_scene_path
     )
 
 
-def upload_bbox_file(current_scene_path, bbox_file):
-    print("Uploaded bbox file:", bbox_file)
-
-    return (
-        current_scene_path
-    )
 
 
 def submit_bbox_params(bbox_color, bbox_line_width,
@@ -74,8 +71,9 @@ def submit_bbox_params(bbox_color, bbox_line_width,
     try:
         bbox_params = bbox_table.astype(np.float32)[:, :6]
     except ValueError:
-        print(f"bbox_table is not valid, ignore it.")
-        print(bbox_table)
+        print(f"bbox_table is not valid, ignore it.\n" + str(bbox_table))
+        if not (bbox_table == "").all():
+            gr.Warning('Tablebox is not valid, ignore it.')
         bbox_params = None
 
     if bbox_params is not None:
@@ -87,9 +85,11 @@ def submit_bbox_params(bbox_color, bbox_line_width,
             # 一维转二维
             bbox_text = "[" + bbox_text + "]"
         bbox_params = process_2d_text_table(bbox_text)[:, :6]
+        assert bbox_params.shape[1] >= 6
     except ValueError:
-        print(f"bbox_text is not valid, ignore it.")
-        print(bbox_table)
+        print(f"bbox_text is not valid, ignore it.\n" + bbox_text)
+        if bbox_text != "":
+            gr.Warning('Textbox is not valid, ignore it.')
         bbox_params = None
 
     if bbox_params is not None:
@@ -108,10 +108,22 @@ def submit_bbox_params(bbox_color, bbox_line_width,
     )
 
 
-def clear_bbox_params(model_3d_path):
+def clear_bbox_params_btn_tab1():
     # 将所有参数重置为默认值, 并返回原始场景路径
     return (
-        agent.original_scene_path if model_3d_path.startswith(examples_path) else model_3d_path,
+        agent.original_scene_path,
+        bbox_color,
+        bbox_line_width,
+        None,
+        None,
+        None,
+        None
+    )
+
+def clear_bbox_params_btn_tab2():
+    # 将所有参数重置为默认值, 并返回原始场景路径
+    return (
+        agent.upload_scene_path,
         bbox_color,
         bbox_line_width,
         None,
