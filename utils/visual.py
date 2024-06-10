@@ -22,10 +22,11 @@ def create_scene_with_bbox(scene_path, bbox_params, axis_align_matrix, bbox_colo
         mesh.vertices = o3d.utility.Vector3dVector(aligned_vertices)
 
     # 添加bbox
-    for bbox_param in bbox_params:
-        bbox_lineset = create_bbox(bbox_param[:3], bbox_param[3:6], color=bbox_color, radius=bbox_line_width)
-        for box_line in bbox_lineset:
-            mesh += box_line
+    if bbox_params is not None:
+        for bbox_param in bbox_params:
+            bbox_lineset = create_bbox(bbox_param[:3], bbox_param[3:6], color=bbox_color, radius=bbox_line_width)
+            for box_line in bbox_lineset:
+                mesh += box_line
 
     mesh = prettify_mesh_for_gradio(mesh)
 

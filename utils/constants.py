@@ -1,4 +1,17 @@
 import os
+import gradio
+
+# Gradio主题
+theme = gradio.themes.Soft()
+
+# 初始init_session_state
+init_session_state = {
+    "original_scene_path": None,
+    "upload_scene_path": None
+}
+
+original_scene_path = "original_scene_path"
+upload_scene_path = "upload_scene_path"
 
 # Tab1 example 文件夹路径
 examples_path = "data/example"
@@ -8,6 +21,12 @@ os.makedirs(examples_path, exist_ok=True)
 temp_path = "data/temp"
 os.makedirs(temp_path, exist_ok=True)
 
+# Tab1 checkgroup选项
+axis_aligned_option = "Axis-Aligned"
+checkgroup_options = [axis_aligned_option, "Show Bbox"]
+default_checkgroup_options = [axis_aligned_option]
+
+
 # gr.Model3D背景颜色
 background_color = (0.95, 0.95, 0.95, 1.0)
 
@@ -15,9 +34,12 @@ background_color = (0.95, 0.95, 0.95, 1.0)
 camera_position = (-50, 65, 70)
 
 # 默认bbox颜色
-bbox_color = "#6BC84A"
+bbox_color = "#5CE6D5"   # "#6BC84A"
+# 备用bbox_color
+standby_bbox_color = ["#F12C1E", "#48E845", "#9372EE"]
 
 # 默认bbox线宽
-bbox_line_width = 0.04
+bbox_line_width = 0.03
 
+# prettify前缀
 prettify_prefix = "prettify_"

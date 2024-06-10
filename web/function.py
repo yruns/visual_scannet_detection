@@ -10,19 +10,20 @@ from utils.comm import process_2d_text_table
 from utils.constants import *
 from utils.convertor import convert_hex_to_rgb, ply_to_obj
 from utils.visual import create_scene_with_bbox
+from utils import scannet as scannet_utils
 
 
-def select_scene(scene_name):
+def select_scene(session_state, scene_name):
     print("Selected scene:", scene_name)
     scene_name = os.path.join(examples_path, scene_name, f"{prettify_prefix}{scene_name}_vh_clean_2.obj")
-    agent.original_scene_path = scene_name
+    session_state[original_scene_path] = scene_name
 
     return (
-        scene_name, scene_name
+        session_state, scene_name, scene_name
     )
 
 
-def upload_scene(scene_file):
+def upload_scene(session_state, scene_file):
     prettify_file = None
     if scene_file is not None and os.path.exists(scene_file):
         # 确保上传文件时才触发，删除文件时忽略
@@ -38,10 +39,11 @@ def upload_scene(scene_file):
             agent.add_temp_file(TempFile(scene_file))
             agent.add_temp_file(TempFile(prettify_file))
 
-    agent.upload_scene_path = prettify_file if prettify_file is not None else scene_file
+    session_state[upload_scene_path] = prettify_file if prettify_file is not None else scene_file
     return (
-        agent.upload_scene_path,
-        agent.upload_scene_path,
+        session_state,
+        session_state[upload_scene_path],
+        session_state[upload_scene_path],
     )
 
 def download_scene(current_scene_path, download_btn):
@@ -53,20 +55,20 @@ def download_scene(current_scene_path, download_btn):
     )
 
 
-def submit_bbox_params(bbox_color, bbox_line_width,
-                       bbox_numpy_file, axis_aligned_matrix_file, bbox_text, bbox_table, btn_id):
+def submit_bbox_params(session_state, bbox_color, bbox_line_width,
+                       bbox_numpy_file, checkgroup, bbox_text, bbox_table, btn_id):
     # 读取bbox_numpy_file（binary）文件
     bbox_numpy, axis_align_matrix = None, None
     if bbox_numpy_file is not None:
         bbox_numpy = np.load(bbox_numpy_file)[:, :6]
         agent.add_temp_file(TempFile(bbox_numpy_file))
-    if axis_aligned_matrix_file is not None:
-        lines = open(axis_aligned_matrix_file).readlines()
-        for line in lines:
-            if 'axisAlignment' in line:
-                axis_align_matrix = [float(x) for x in line.rstrip().strip('axisAlignment = ').split(' ')]
-                axis_align_matrix = np.array(axis_align_matrix).reshape((4, 4))
-        agent.add_temp_file(TempFile(axis_aligned_matrix_file))
+
+    if axis_aligned_option in checkgroup:
+        meta_file = session_state[original_scene_path].replace(prettify_prefix, "").replace("_vh_clean_2.obj", ".txt")
+        if os.path.exists(meta_file):
+            axis_align_matrix = scannet_utils.read_axis_align_matrix(meta_file)
+        else:
+            gr.Warning("A meta file is not found for the scene {}".format(session_state[original_scene_path].split("/")[-2]))
 
     try:
         bbox_params = bbox_table.astype(np.float32)[:, :6]
@@ -96,7 +98,7 @@ def submit_bbox_params(bbox_color, bbox_line_width,
         bbox_numpy = np.concatenate([bbox_numpy, bbox_params], axis=0) if bbox_numpy is not None else bbox_params
 
     new_scene_path = create_scene_with_bbox(
-        agent.original_scene_path if btn_id == 'tab1' else agent.upload_scene_path,
+        session_state[original_scene_path] if btn_id == 'tab1' else session_state[upload_scene_path],
         bbox_numpy,
         axis_align_matrix,
         convert_hex_to_rgb(bbox_color, normalize=True),
@@ -104,15 +106,17 @@ def submit_bbox_params(bbox_color, bbox_line_width,
     )
 
     return (
-        new_scene_path, new_scene_path
+        session_state, new_scene_path, new_scene_path
     )
 
 
-def clear_bbox_params(clear_btn_id):
+def clear_bbox_params(session_state, clear_btn_id):
     # 将所有参数重置为默认值, 并返回原始场景路径
     return (
-        agent.original_scene_path if clear_btn_id == 'tab1' else agent.upload_scene_path,
-        agent.original_scene_path if clear_btn_id == 'tab1' else agent.upload_scene_path,
+        session_state,
+        session_state[original_scene_path] if clear_btn_id == 'tab1' else session_state[upload_scene_path],
+        session_state[original_scene_path] if clear_btn_id == 'tab1' else session_state[upload_scene_path],
+        default_checkgroup_options,
         bbox_color,
         bbox_line_width,
         None,
