@@ -54,7 +54,7 @@ def prettify_mesh_for_gradio(mesh):
     return mesh
 
 
-def create_cylinder_mesh(p0, p1, color, radius=0.02, resolution=20, split=1):
+def create_cylinder_mesh(p0, p1, color, radius=0.02, resolution=50, split=1):
     """Create a colored cylinder mesh between two points p0 and p1."""
     cylinder = o3d.geometry.TriangleMesh.create_cylinder(
         radius=radius, height=1, resolution=resolution, split=split

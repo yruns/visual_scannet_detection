@@ -54,7 +54,7 @@ def download_scene(current_scene_path, download_btn):
 
 
 def submit_bbox_params(bbox_color, bbox_line_width,
-                       bbox_numpy_file, axis_aligned_matrix_file, bbox_text, bbox_table):
+                       bbox_numpy_file, axis_aligned_matrix_file, bbox_text, bbox_table, btn_id):
     # 读取bbox_numpy_file（binary）文件
     bbox_numpy, axis_align_matrix = None, None
     if bbox_numpy_file is not None:
@@ -96,7 +96,7 @@ def submit_bbox_params(bbox_color, bbox_line_width,
         bbox_numpy = np.concatenate([bbox_numpy, bbox_params], axis=0) if bbox_numpy is not None else bbox_params
 
     new_scene_path = create_scene_with_bbox(
-        agent.original_scene_path,
+        agent.original_scene_path if btn_id == 'tab1' else agent.upload_scene_path,
         bbox_numpy,
         axis_align_matrix,
         convert_hex_to_rgb(bbox_color, normalize=True),
@@ -108,11 +108,11 @@ def submit_bbox_params(bbox_color, bbox_line_width,
     )
 
 
-def clear_bbox_params_btn_tab1():
+def clear_bbox_params(clear_btn_id):
     # 将所有参数重置为默认值, 并返回原始场景路径
     return (
-        agent.original_scene_path,
-        agent.original_scene_path,
+        agent.original_scene_path if clear_btn_id == 'tab1' else agent.upload_scene_path,
+        agent.original_scene_path if clear_btn_id == 'tab1' else agent.upload_scene_path,
         bbox_color,
         bbox_line_width,
         None,
@@ -121,15 +121,3 @@ def clear_bbox_params_btn_tab1():
         None
     )
 
-def clear_bbox_params_btn_tab2():
-    # 将所有参数重置为默认值, 并返回原始场景路径
-    return (
-        agent.upload_scene_path,
-        agent.upload_scene_path,
-        bbox_color,
-        bbox_line_width,
-        None,
-        None,
-        None,
-        None
-    )

@@ -1,4 +1,5 @@
 import os.path
+from functools import partial
 
 from utils.web import get_examples
 from web.function import *
@@ -11,7 +12,7 @@ else:
     raise Exception(f"No scene available! Check the path of the scene folder: {examples_path}.")
 agent.original_scene_path = scene_choice[0]
 
-with gr.Blocks() as demo:
+with gr.Blocks(title="Visual ScanNet's Detection") as demo:
     with gr.Tabs(selected=0):
         with gr.Tab("Visual Scene"):
             with gr.Column():
@@ -75,12 +76,14 @@ with gr.Blocks() as demo:
                                         )
                                 with gr.Column():
                                     # bbox文件上传
-                                    bbox_numpy_file = gr.File(label="Upload Bbox(only support .npy file)", type="filepath",
+                                    bbox_numpy_file = gr.File(label="Upload Bbox(only support .npy file)",
+                                                              type="filepath",
                                                               scale=1)
                                     with gr.Accordion(label="Examples for bbox numpy file:", open=False):
                                         gr.Examples(
                                             examples=[
-                                                choice.replace("vh_clean_2.obj", "aligned_bbox.npy").replace(prettify_prefix, "")
+                                                choice.replace("vh_clean_2.obj", "aligned_bbox.npy").replace(
+                                                    prettify_prefix, "")
                                                 for choice in scene_choice
                                             ],
                                             inputs=bbox_numpy_file,
@@ -158,14 +161,14 @@ with gr.Blocks() as demo:
 
     # 提交按钮
     submit_button.click(
-        fn=submit_bbox_params,
+        fn=partial(submit_bbox_params, btn_id='tab1'),
         inputs=[bbox_color_picker, bbox_line_width_slider,
                 bbox_numpy_file, axis_aligned_matrix_file, bbox_text, bbox_table],
         outputs=[model_3d, download_button],
     )
 
     submit_button2.click(
-        fn=submit_bbox_params,
+        fn=partial(submit_bbox_params, btn_id='tab2'),
         inputs=[bbox_color_picker2, bbox_line_width_slider2,
                 bbox_numpy_file2, axis_aligned_matrix_file2, bbox_text2, bbox_table2],
         outputs=[model_display, download_button2],
@@ -173,14 +176,14 @@ with gr.Blocks() as demo:
 
     # 清除按钮
     clear_button.click(
-        fn=clear_bbox_params_btn_tab1,
+        fn=partial(clear_bbox_params, clear_btn_id="tab1"),
         inputs=[],
         outputs=[model_3d, download_button, bbox_color_picker, bbox_line_width_slider,
                  bbox_numpy_file, axis_aligned_matrix_file, bbox_text, bbox_table],
     )
 
     clear_button2.click(
-        fn=clear_bbox_params_btn_tab2,
+        fn=partial(clear_bbox_params, clear_btn_id="tab2"),
         inputs=[],
         outputs=[model_display, download_button2, bbox_color_picker2, bbox_line_width_slider2,
                  bbox_numpy_file2, axis_aligned_matrix_file2, bbox_text2, bbox_table2],

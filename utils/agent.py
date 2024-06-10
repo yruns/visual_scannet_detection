@@ -23,8 +23,8 @@ class Agent(object):
         self.temp_files.enqueue(file)
         self.current_temp_size += file.size
 
-        if self.current_temp_size > self.max_temp_size:
-            self.delete_temp_files()
+        # if self.current_temp_size > self.max_temp_size:
+        #     self.delete_temp_files()
 
     def delete_temp_files(self):
         delete_size = self.max_temp_size * self.delete_rate
