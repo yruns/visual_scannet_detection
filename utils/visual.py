@@ -9,7 +9,7 @@ from utils.constants import temp_path, prettify_prefix
 from utils.scannet import align_point_vertices
 
 
-def create_scene_with_bbox(scene_path, bbox_params, axis_align_matrix, bbox_color, bbox_line_width):
+def create_scene_with_bbox(scene_path, bboxes, axis_align_matrix, bbox_line_width):
     if has_prefix(scene_path, prettify_prefix):
         scene_path = remove_prefix(scene_path, prettify_prefix)
     # 加载原始mesh
@@ -22,15 +22,17 @@ def create_scene_with_bbox(scene_path, bbox_params, axis_align_matrix, bbox_colo
         mesh.vertices = o3d.utility.Vector3dVector(aligned_vertices)
 
     # 添加bbox
-    if bbox_params is not None:
-        for bbox_param in bbox_params:
-            bbox_lineset = create_bbox(bbox_param[:3], bbox_param[3:6], color=bbox_color, radius=bbox_line_width)
-            for box_line in bbox_lineset:
-                mesh += box_line
+    if bboxes is not None and len(bboxes) > 0:
+        for bbox in bboxes:
+            bbox_params, bbox_color = bbox["bbox_params"], bbox["color"]
+            for i in range(bbox_params.shape[0]):
+                bbox_lineset = create_bbox(bbox_params[i, :3], bbox_params[i, 3:], color=bbox_color, radius=bbox_line_width)
+                for box_line in bbox_lineset:
+                    mesh += box_line
 
     mesh = prettify_mesh_for_gradio(mesh)
 
-    file_name = generate_hash(scene_path, bbox_params, axis_align_matrix, bbox_color, bbox_line_width)
+    file_name = generate_hash(scene_path, bboxes, axis_align_matrix, bbox_line_width)
     file_path = os.path.join(temp_path, f"{file_name}.obj")
     o3d.io.write_triangle_mesh(file_path, mesh, write_vertex_colors=True)
     agent.add_temp_file(TempFile(file_path))

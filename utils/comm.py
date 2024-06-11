@@ -55,6 +55,9 @@ def generate_hash(*args):
 
 
 def process_2d_text_table(printed_array):
+    if printed_array.count("[") == 1:
+        # 一维转二维
+        printed_array = "[" + printed_array + "]"
     # 将文本表格处理成列表
     # 用字符串处理函数将其转换为合适的形式
     array_str = printed_array.replace('[', '').replace(']', '').replace('\n', ' ').replace(',', ' ')

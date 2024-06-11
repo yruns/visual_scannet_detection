@@ -74,20 +74,39 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=theme, css=css) as demo
                             with gr.Row():
                                 with gr.Tabs(selected=0, elem_classes="bbox_tabs"):
                                     with gr.Tab("Add box"):
-                                        box_nums = gr.Slider(minimum=1, maximum=len(standby_bbox_color), value=1, step=1,
-                                                             label="Number of boxes you want to add")
+                                        with gr.Row():
+                                            box_nums = gr.Slider(minimum=1, maximum=len(standby_bbox_color), value=1, step=1,
+                                                                 label="Number of boxes you want to add", scale=5)
+                                            with gr.Column():
+                                                add_btn = gr.Button(value="Add", scale=1, variant="primary")
+                                                clear_add_btn = gr.Button(value="Remove", scale=1)
 
 
                                         @gr.render(inputs=box_nums)
                                         def render_box_want_to_add(box_nums):
-                                            items = []
+                                            add_items = []
                                             for i in range(box_nums):
-                                                with gr.Row() as row:
-                                                    gr.ColorPicker(label=f"Color {i + 1}", value=standby_bbox_color[i], scale=1,
-                                                                   min_width=120),
-                                                    gr.Textbox(label=f"Box {i + 1}", scale=6,
+                                                with gr.Row():
+                                                    picker_ = gr.ColorPicker(label=f"Color {i + 1}", value=standby_bbox_color[i], scale=1,
+                                                                   min_width=90, interactive=True),
+                                                    textbox_ = gr.Textbox(label=f"Box {i + 1}", scale=6, interactive=True, key=i,
                                                                placeholder="bbox, eg. [ 1.48  3.52  1.85  1.74 0.231  0.572 ]"),
-                                                    items.append(row)
+                                                    checkbox_ = gr.Checkbox(label="render", scale=1, value=True, interactive=True, min_width=90)
+                                                add_items.extend([picker_, textbox_, checkbox_])
+
+                                            print(add_items)
+                                            add_btn.click(
+                                                fn=submit_add_box,
+                                                inputs=[session_state] + [item[0] if isinstance(item, tuple) else item for item in add_items],
+                                                outputs=[session_state]
+                                            )
+                                            clear_add_btn.click(
+                                                fn=clear_add_box,
+                                                inputs=[session_state],
+                                                outputs=[session_state] + [item[0] if isinstance(item, tuple) else item for item in add_items]
+                                            )
+
+
 
                                     with gr.Tab("Textbox"):
                                         # bbox表格

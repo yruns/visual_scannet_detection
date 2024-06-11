@@ -54,10 +54,34 @@ def download_scene(current_scene_path, download_btn):
         current_scene_path
     )
 
+def submit_add_box(session_state, *bbox_params):
+    if len(bbox_params) % 3 != 0:
+        gr.Warning("The number of parameters is not correct, ignore it.")
+        return (
+            session_state
+        )
+    session_state[add_bbox_params] = []
+    for i in range(len(bbox_params) // 3):
+        bbox_param = {
+            "color": bbox_params[int(i * 3)],
+            "array_str": bbox_params[int(i * 3 + 1)],
+            "show": bbox_params[int(i * 3 + 2)]
+        }
+        session_state[add_bbox_params].append(bbox_param)
 
-def submit_bbox_params(session_state, bbox_color, bbox_line_width,
-                       bbox_numpy_file, checkgroup, bbox_text, bbox_table, btn_id):
-    # 读取bbox_numpy_file（binary）文件
+    return (
+        session_state
+    )
+
+def clear_add_box(session_state):
+    session_state[add_bbox_params] = None
+    return (
+        session_state
+    )
+
+def submit_bbox_params(session_state, bbox_color, bbox_line_width, bbox_numpy_file, checkgroup,
+                       bbox_text, bbox_table, btn_id):
+    # 读取bbox_numpy_file文件
     bbox_numpy, axis_align_matrix = None, None
     if bbox_numpy_file is not None:
         bbox_numpy = np.load(bbox_numpy_file)[:, :6]
@@ -83,9 +107,6 @@ def submit_bbox_params(session_state, bbox_color, bbox_line_width,
 
     # 处理bbox_text
     try:
-        if bbox_text.count("[") == 1:
-            # 一维转二维
-            bbox_text = "[" + bbox_text + "]"
         bbox_params = process_2d_text_table(bbox_text)[:, :6]
         assert bbox_params.shape[1] >= 6
     except ValueError:
@@ -97,11 +118,33 @@ def submit_bbox_params(session_state, bbox_color, bbox_line_width,
     if bbox_params is not None:
         bbox_numpy = np.concatenate([bbox_numpy, bbox_params], axis=0) if bbox_numpy is not None else bbox_params
 
+    bboxes = []
+    if bbox_numpy is not None:
+        bboxes.append({
+            "color": convert_hex_to_rgb(bbox_color, normalize=True),
+            "bbox_params": bbox_numpy,
+        })
+
+    # 处理add_bbox_params
+    extra_bbox_params = session_state[add_bbox_params]
+    if extra_bbox_params is not None:
+        for bbox in extra_bbox_params:
+            if bbox["show"]:
+                try:
+                    bbox_params = process_2d_text_table(bbox["array_str"])[:, :6]
+                    assert bbox_params.shape[1] >= 6
+                    bboxes.append({
+                        "color": convert_hex_to_rgb(bbox["color"], normalize=True),
+                        "bbox_params": bbox_params,
+                    })
+                except Exception as e:
+                    print(f"bbox_text is not valid, ignore it.\n" + bbox["array_str"])
+                    continue
+
     new_scene_path = create_scene_with_bbox(
         session_state[original_scene_path] if btn_id == 'tab1' else session_state[upload_scene_path],
-        bbox_numpy,
+        bboxes,
         axis_align_matrix,
-        convert_hex_to_rgb(bbox_color, normalize=True),
         bbox_line_width
     )
 
