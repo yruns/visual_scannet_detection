@@ -12,20 +12,15 @@ else:
     raise Exception(f"No scene available! Check the path of the scene folder: {examples_path}.")
 agent.original_scene_path = scene_choice[0]
 
-# bbox_upload css 占整个页面的1/3
-css = """
-.bbox_upload {
-    width: 30%;
-}
 
-.bbox_tabs {
-    width: 70%;
-}
-"""
-
-with gr.Blocks(title="Visual ScanNet's Detection", theme=theme, css=css) as demo:
+with gr.Blocks(title="Visual ScanNet's Detection", theme=theme, css=open("resources/index.css").read()) as demo:
     init_session_state["original_scene_path"] = scene_choice[0]
     session_state = gr.State(value=init_session_state)
+
+    demo.load(
+        fn=None,
+        js=open("resources/main.js").read(),
+    )
 
     with gr.Tabs(selected=0):
         with gr.Tab("Visual Scene"):
@@ -68,7 +63,7 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=theme, css=css) as demo
                                 download_button = gr.DownloadButton(label="Download Scene", scale=3,
                                                                     value=agent.original_scene_path)
                                 with gr.Row():
-                                    submit_button = gr.Button(value="Submit", scale=3, variant="primary")
+                                    submit_button = gr.Button(value="Submit", scale=3, variant="primary", elem_id="submit")
                                     clear_button = gr.Button(value="Clear", scale=3)
 
                             with gr.Row():
@@ -76,10 +71,10 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=theme, css=css) as demo
                                     with gr.Tab("Add box"):
                                         with gr.Row():
                                             box_nums = gr.Slider(minimum=1, maximum=len(standby_bbox_color), value=1, step=1,
-                                                                 label="Number of boxes you want to add", scale=5)
-                                            with gr.Column():
-                                                add_btn = gr.Button(value="Add", scale=1, variant="primary")
-                                                clear_add_btn = gr.Button(value="Remove", scale=1)
+                                                                 label="Number of boxes you want to add", scale=6)
+                                            with gr.Column(scale=2, min_width=100):
+                                                add_btn = gr.Button(value="Add", scale=2, variant="primary", elem_id="add_box", visible=False)
+                                                clear_add_btn = gr.Button(value="Remove", scale=2)
 
 
                                         @gr.render(inputs=box_nums)
@@ -94,7 +89,6 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=theme, css=css) as demo
                                                     checkbox_ = gr.Checkbox(label="render", scale=1, value=True, interactive=True, min_width=90)
                                                 add_items.extend([picker_, textbox_, checkbox_])
 
-                                            print(add_items)
                                             add_btn.click(
                                                 fn=submit_add_box,
                                                 inputs=[session_state] + [item[0] if isinstance(item, tuple) else item for item in add_items],
@@ -102,7 +96,7 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=theme, css=css) as demo
                                             )
                                             clear_add_btn.click(
                                                 fn=clear_add_box,
-                                                inputs=[session_state],
+                                                inputs=[session_state] + [item[0] if isinstance(item, tuple) else item for item in add_items],
                                                 outputs=[session_state] + [item[0] if isinstance(item, tuple) else item for item in add_items]
                                             )
 
@@ -195,6 +189,7 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=theme, css=css) as demo
                 with gr.Row():
                     submit_button2 = gr.Button(value="Submit", scale=1, variant="primary")
                     clear_button2 = gr.Button(value="Clear", scale=1)
+
 
     # 事件绑定
     tab1_dropdown_scene.change(

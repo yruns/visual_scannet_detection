@@ -73,10 +73,23 @@ def submit_add_box(session_state, *bbox_params):
         session_state
     )
 
-def clear_add_box(session_state):
+def clear_add_box(session_state, *bbox_params):
     session_state[add_bbox_params] = None
+    if len(bbox_params) % 3 != 0:
+        gr.Warning("The number of parameters is not correct, ignore it.")
+        return (
+            session_state
+        )
+
+    bbox_params_return = []
+    for i in range(len(bbox_params) // 3):
+        bbox_params_return.append(standby_bbox_color[i])
+        bbox_params_return.append("")
+        bbox_params_return.append(True)
+
     return (
-        session_state
+        session_state,
+        *bbox_params_return
     )
 
 def submit_bbox_params(session_state, bbox_color, bbox_line_width, bbox_numpy_file, checkgroup,
