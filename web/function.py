@@ -1,10 +1,9 @@
-import os
 import shutil
 
 import numpy as np
 import gradio as gr
 
-from utils import agent
+from utils import agent, logger
 from utils.comm import TempFile
 from utils.comm import process_2d_text_table
 from utils.constants import *
@@ -14,7 +13,7 @@ from utils import scannet as scannet_utils
 
 
 def select_scene(session_state, scene_name):
-    print("Selected scene:", scene_name)
+    logger.info("Selected scene:", scene_name)
     scene_name = os.path.join(examples_path, scene_name, f"{prettify_prefix}{scene_name}_vh_clean_2.obj")
     session_state[original_scene_path] = scene_name
 
@@ -31,7 +30,7 @@ def upload_scene(session_state, scene_file):
             os.remove(os.path.join(temp_path, os.path.basename(scene_file)))
         shutil.move(scene_file, temp_path)
         scene_file = os.path.join(temp_path, os.path.basename(scene_file))
-        print("Uploaded scene file:", scene_file)
+        logger.info("Uploaded scene file:", scene_file)
         agent.add_temp_file(TempFile(scene_file))
 
         if scene_file.endswith('.ply'):
@@ -49,7 +48,7 @@ def upload_scene(session_state, scene_file):
 def download_scene(current_scene_path, download_btn):
     if download_btn is None:
         gr.Warning("Now there is no scene to download.")
-    print("Downloaded scene file:", current_scene_path)
+    logger.info("Downloaded scene file:", current_scene_path)
     return (
         current_scene_path
     )
@@ -110,7 +109,7 @@ def submit_bbox_params(session_state, bbox_color, bbox_line_width, bbox_numpy_fi
     try:
         bbox_params = bbox_table.astype(np.float32)[:, :6]
     except ValueError:
-        print(f"bbox_table is not valid, ignore it.\n" + str(bbox_table))
+        logger.info(f"bbox_table is not valid, ignore it.\n" + str(bbox_table))
         if not (bbox_table == "").all():
             gr.Warning('Tablebox is not valid, ignore it.')
         bbox_params = None
@@ -123,7 +122,7 @@ def submit_bbox_params(session_state, bbox_color, bbox_line_width, bbox_numpy_fi
         bbox_params = process_2d_text_table(bbox_text)[:, :6]
         assert bbox_params.shape[1] >= 6
     except ValueError:
-        print(f"bbox_text is not valid, ignore it.\n" + bbox_text)
+        logger.info(f"bbox_text is not valid, ignore it.\n" + bbox_text)
         if bbox_text != "":
             gr.Warning('Textbox is not valid, ignore it.')
         bbox_params = None
@@ -150,8 +149,8 @@ def submit_bbox_params(session_state, bbox_color, bbox_line_width, bbox_numpy_fi
                         "color": convert_hex_to_rgb(bbox["color"], normalize=True),
                         "bbox_params": bbox_params,
                     })
-                except Exception as e:
-                    print(f"bbox_text is not valid, ignore it.\n" + bbox["array_str"])
+                except Exception:
+                    logger.info(f"bbox_text is not valid, ignore it.\n" + bbox["array_str"])
                     continue
 
     new_scene_path = create_scene_with_bbox(
@@ -180,4 +179,3 @@ def clear_bbox_params(session_state, clear_btn_id):
         None,
         None
     )
-

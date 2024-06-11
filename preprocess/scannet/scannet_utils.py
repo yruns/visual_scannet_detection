@@ -8,12 +8,8 @@ import sys
 
 import numpy as np
 
-try:
-    from plyfile import PlyData, PlyElement
-except:
-    print("Please install the module 'plyfile' for PLY i/o, e.g.")
-    print("pip install plyfile")
-    sys.exit(-1)
+
+from plyfile import PlyData, PlyElement
 
 
 def normalize_v3(arr):

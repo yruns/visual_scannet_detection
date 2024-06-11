@@ -1,4 +1,3 @@
-import os.path
 from functools import partial
 
 from utils.web import get_examples
@@ -7,7 +6,7 @@ from web.function import *
 # Global Variables
 scene_choice = get_examples()
 if scene_choice:
-    print(f"Found {len(scene_choice)} scenes: {scene_choice}")
+    logger.info(f"Found {len(scene_choice)} scenes: {scene_choice}")
 else:
     raise Exception(f"No scene available! Check the path of the scene folder: {examples_path}.")
 agent.original_scene_path = scene_choice[0]
