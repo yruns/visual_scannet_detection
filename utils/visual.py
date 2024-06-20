@@ -5,13 +5,13 @@ import open3d as o3d
 
 from utils import agent, TempFile
 from utils.comm import generate_hash, remove_prefix, has_prefix
-from utils.constants import temp_path, prettify_prefix
+from utils import constants as const
 from utils.scannet import align_point_vertices
 
 
 def create_scene_with_bbox(scene_path, bboxes, axis_align_matrix, bbox_line_width):
-    if has_prefix(scene_path, prettify_prefix):
-        scene_path = remove_prefix(scene_path, prettify_prefix)
+    if has_prefix(scene_path, const.prettify_prefix):
+        scene_path = remove_prefix(scene_path, const.prettify_prefix)
     # 加载原始mesh
     mesh = o3d.io.read_triangle_mesh(scene_path)
 
@@ -33,7 +33,7 @@ def create_scene_with_bbox(scene_path, bboxes, axis_align_matrix, bbox_line_widt
     mesh = prettify_mesh_for_gradio(mesh)
 
     file_name = generate_hash(scene_path, bboxes, axis_align_matrix, bbox_line_width)
-    file_path = os.path.join(temp_path, f"{file_name}.obj")
+    file_path = os.path.join(const.temp_path, f"{file_name}.obj")
     o3d.io.write_triangle_mesh(file_path, mesh, write_vertex_colors=True)
     agent.add_temp_file(TempFile(file_path))
 

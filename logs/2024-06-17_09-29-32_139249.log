@@ -1,0 +1,110 @@
+2024-06-17 09:29:34.140 | INFO     | web.page:<module>:12 - Found 4 scenes: ['data/example/scene0000_00/prettify_scene0000_00_vh_clean_2.obj', 'data/example/scene0025_00/prettify_scene0025_00_vh_clean_2.obj', 'data/example/scene0051_00/prettify_scene0051_00_vh_clean_2.obj', 'data/example/scene0480_00/prettify_scene0480_00_vh_clean_2.obj']
+2024-06-17 09:30:56.626 | INFO     | web.function:select_scene:16 - Selected scene:
+2024-06-17 09:32:42.142 | INFO     | web.function:select_scene:16 - Selected scene:
+2024-06-17 09:33:31.069 | INFO     | web.function:select_scene:16 - Selected scene:
+2024-06-17 12:54:46.277 | INFO     | web.function:select_scene:16 - Selected scene:
+2024-06-17 12:54:54.637 | INFO     | web.function:select_scene:16 - Selected scene:
+2024-06-17 12:54:56.795 | INFO     | web.function:select_scene:16 - Selected scene:
+2024-06-17 13:00:31.175 | INFO     | web.function:submit_bbox_params:112 - bbox_table is not valid, ignore it.
+[['' '' '' '' '' '']]
+2024-06-17 13:00:31.175 | INFO     | web.function:submit_bbox_params:125 - bbox_text is not valid, ignore it.
+
+2024-06-17 13:00:45.407 | INFO     | web.function:submit_bbox_params:112 - bbox_table is not valid, ignore it.
+[['' '' '' '' '' '']]
+2024-06-17 13:00:45.408 | INFO     | web.function:submit_bbox_params:125 - bbox_text is not valid, ignore it.
+
+2024-06-17 13:00:45.408 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-17 13:00:45.408 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-17 13:00:51.525 | INFO     | web.function:submit_bbox_params:112 - bbox_table is not valid, ignore it.
+[['' '' '' '' '' '']]
+2024-06-17 13:00:51.526 | INFO     | web.function:submit_bbox_params:125 - bbox_text is not valid, ignore it.
+
+2024-06-17 13:00:51.526 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-17 13:00:51.526 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-17 13:00:58.666 | INFO     | web.function:submit_bbox_params:112 - bbox_table is not valid, ignore it.
+[['' '' '' '' '' '']]
+2024-06-17 13:00:58.667 | INFO     | web.function:submit_bbox_params:125 - bbox_text is not valid, ignore it.
+
+2024-06-17 13:00:58.667 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-17 13:00:58.667 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:03:25.912 | INFO     | web.function:submit_bbox_params:112 - bbox_table is not valid, ignore it.
+[['' '' '' '' '' '']]
+2024-06-17 14:03:25.913 | INFO     | web.function:submit_bbox_params:125 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:03:25.913 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:03:25.913 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:03:31.912 | INFO     | web.function:submit_bbox_params:112 - bbox_table is not valid, ignore it.
+[['' '' '' '' '' '']]
+2024-06-17 14:03:31.912 | INFO     | web.function:submit_bbox_params:125 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:03:31.912 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:03:31.912 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:03:47.993 | INFO     | web.function:submit_bbox_params:112 - bbox_table is not valid, ignore it.
+[['' '' '' '' '' '']]
+2024-06-17 14:03:47.993 | INFO     | web.function:submit_bbox_params:125 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:03:47.993 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:03:47.993 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:03:53.925 | INFO     | web.function:select_scene:16 - Selected scene:
+2024-06-17 14:03:56.101 | INFO     | web.function:submit_bbox_params:112 - bbox_table is not valid, ignore it.
+[['' '' '' '' '' '']]
+2024-06-17 14:03:56.103 | INFO     | web.function:submit_bbox_params:125 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:03:56.103 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:03:56.103 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:04:04.658 | INFO     | web.function:select_scene:16 - Selected scene:
+2024-06-17 14:04:07.733 | INFO     | web.function:submit_bbox_params:112 - bbox_table is not valid, ignore it.
+[['' '' '' '' '' '']]
+2024-06-17 14:04:07.734 | INFO     | web.function:submit_bbox_params:125 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:04:07.734 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:04:07.734 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:04:13.536 | INFO     | web.function:submit_bbox_params:112 - bbox_table is not valid, ignore it.
+[['' '' '' '' '' '']]
+2024-06-17 14:04:13.537 | INFO     | web.function:submit_bbox_params:125 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:04:13.537 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:04:13.537 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:04:19.064 | INFO     | web.function:submit_bbox_params:112 - bbox_table is not valid, ignore it.
+[['' '' '' '' '' '']]
+2024-06-17 14:04:19.065 | INFO     | web.function:submit_bbox_params:125 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:04:19.065 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:04:19.066 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:04:34.983 | INFO     | web.function:select_scene:16 - Selected scene:
+2024-06-17 14:04:42.012 | INFO     | web.function:submit_bbox_params:112 - bbox_table is not valid, ignore it.
+[['' '' '' '' '' '']]
+2024-06-17 14:04:42.013 | INFO     | web.function:submit_bbox_params:125 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:04:59.525 | INFO     | web.function:submit_bbox_params:112 - bbox_table is not valid, ignore it.
+[['' '' '' '' '' '']]
+2024-06-17 14:04:59.526 | INFO     | web.function:submit_bbox_params:125 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:04:59.526 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:05:04.433 | INFO     | web.function:submit_bbox_params:112 - bbox_table is not valid, ignore it.
+[['' '' '' '' '' '']]
+2024-06-17 14:05:04.434 | INFO     | web.function:submit_bbox_params:125 - bbox_text is not valid, ignore it.
+
+2024-06-17 14:05:04.434 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+

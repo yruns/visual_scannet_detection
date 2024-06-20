@@ -1,0 +1,14 @@
+2024-06-15 13:57:17.994 | INFO     | web.page:<module>:9 - Found 4 scenes: ['data/example/scene0000_00/prettify_scene0000_00_vh_clean_2.obj', 'data/example/scene0025_00/prettify_scene0025_00_vh_clean_2.obj', 'data/example/scene0051_00/prettify_scene0051_00_vh_clean_2.obj', 'data/example/scene0480_00/prettify_scene0480_00_vh_clean_2.obj']
+2024-06-15 13:57:23.198 | INFO     | web.function:select_scene:16 - Selected scene:
+2024-06-15 13:57:40.807 | INFO     | web.function:submit_bbox_params:112 - bbox_table is not valid, ignore it.
+[['' '' '' '' '' '']]
+2024-06-15 13:57:40.807 | INFO     | web.function:submit_bbox_params:125 - bbox_text is not valid, ignore it.
+
+2024-06-15 13:57:40.807 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+
+2024-06-15 13:58:09.598 | INFO     | web.function:submit_bbox_params:112 - bbox_table is not valid, ignore it.
+[['' '' '' '' '' '']]
+2024-06-15 13:58:09.598 | INFO     | web.function:submit_bbox_params:125 - bbox_text is not valid, ignore it.
+
+2024-06-15 13:58:09.598 | INFO     | web.function:submit_bbox_params:153 - bbox_text is not valid, ignore it.
+

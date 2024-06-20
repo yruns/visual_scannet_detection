@@ -1,20 +1,23 @@
 from functools import partial
+import gradio as gr
 
 from utils.web import get_examples
-from web.function import *
+from utils import logger, agent
+from utils import constants as const
+from web import function as bind_func
 
 # Global Variables
 scene_choice = get_examples()
 if scene_choice:
     logger.info(f"Found {len(scene_choice)} scenes: {scene_choice}")
 else:
-    raise Exception(f"No scene available! Check the path of the scene folder: {examples_path}.")
+    raise Exception(f"No scene available! Check the path of the scene folder: {const.examples_path}.")
 agent.original_scene_path = scene_choice[0]
 
 
-with gr.Blocks(title="Visual ScanNet's Detection", theme=theme, css=open("resources/index.css").read()) as demo:
-    init_session_state["original_scene_path"] = scene_choice[0]
-    session_state = gr.State(value=init_session_state)
+with gr.Blocks(title="Visual ScanNet's Detection", theme=const.theme, css=open("resources/index.css").read()) as demo:
+    const.init_session_state["original_scene_path"] = scene_choice[0]
+    session_state = gr.State(value=const.init_session_state)
 
     demo.load(
         fn=None,
@@ -36,9 +39,9 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=theme, css=open("resour
 
                         model_3d = gr.Model3D(
                             value=agent.original_scene_path,
-                            clear_color=background_color,
+                            clear_color=const.background_color,
                             label="3D Model",
-                            camera_position=camera_position,
+                            camera_position=const.camera_position,
                             zoom_speed=1,
                         )
 
@@ -47,16 +50,16 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=theme, css=open("resour
                             # bbox颜色选择器+线宽
                             with gr.Row():
                                 # 颜色选择器
-                                bbox_color_picker = gr.ColorPicker(label="Bbox Color", value=bbox_color, scale=1,
+                                bbox_color_picker = gr.ColorPicker(label="Bbox Color", value=const.bbox_color, scale=1,
                                                                    min_width=130)
                                 checkgroup = gr.CheckboxGroup(
                                     label="Settings",
-                                    choices=checkgroup_options,
-                                    value=default_checkgroup_options,
+                                    choices=const.checkgroup_options,
+                                    value=const.default_checkgroup_options,
                                     scale=5,
                                 )
                                 bbox_line_width_slider = gr.Slider(minimum=0.01, maximum=0.1,
-                                                                   value=bbox_line_width, label="Bbox Line Width",
+                                                                   value=const.bbox_line_width, label="Bbox Line Width",
                                                                    scale=6)
 
                                 download_button = gr.DownloadButton(label="Download Scene", scale=3,
@@ -69,7 +72,7 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=theme, css=open("resour
                                 with gr.Tabs(selected=0, elem_classes="bbox_tabs"):
                                     with gr.Tab("Add box"):
                                         with gr.Row():
-                                            box_nums = gr.Slider(minimum=1, maximum=len(standby_bbox_color), value=1, step=1,
+                                            box_nums = gr.Slider(minimum=1, maximum=len(const.standby_bbox_color), value=1, step=1,
                                                                  label="Number of boxes you want to add", scale=6)
                                             with gr.Column(scale=2, min_width=100):
                                                 add_btn = gr.Button(value="Add", scale=2, variant="primary", elem_id="add_box", visible=False)
@@ -81,7 +84,7 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=theme, css=open("resour
                                             add_items = []
                                             for i in range(box_nums):
                                                 with gr.Row():
-                                                    picker_ = gr.ColorPicker(label=f"Color {i + 1}", value=standby_bbox_color[i], scale=1,
+                                                    picker_ = gr.ColorPicker(label=f"Color {i + 1}", value=const.standby_bbox_color[i], scale=1,
                                                                    min_width=90, interactive=True),
                                                     textbox_ = gr.Textbox(label=f"Box {i + 1}", scale=6, interactive=True, key=i,
                                                                placeholder="bbox, eg. [ 1.48  3.52  1.85  1.74 0.231  0.572 ]"),
@@ -89,12 +92,12 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=theme, css=open("resour
                                                 add_items.extend([picker_, textbox_, checkbox_])
 
                                             add_btn.click(
-                                                fn=submit_add_box,
+                                                fn=bind_func.submit_add_box,
                                                 inputs=[session_state] + [item[0] if isinstance(item, tuple) else item for item in add_items],
                                                 outputs=[session_state]
                                             )
                                             clear_add_btn.click(
-                                                fn=clear_add_box,
+                                                fn=bind_func.clear_add_box,
                                                 inputs=[session_state] + [item[0] if isinstance(item, tuple) else item for item in add_items],
                                                 outputs=[session_state] + [item[0] if isinstance(item, tuple) else item for item in add_items]
                                             )
@@ -137,7 +140,7 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=theme, css=open("resour
                                         gr.Examples(
                                             examples=[
                                                 choice.replace("vh_clean_2.obj", "aligned_bbox.npy").replace(
-                                                    prettify_prefix, "")
+                                                    const.prettify_prefix, "")
                                                 for choice in scene_choice
                                             ],
                                             inputs=bbox_numpy_file,
@@ -146,9 +149,9 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=theme, css=open("resour
 
         with gr.Tab("Upload Scene"):
             model_display = gr.Model3D(
-                camera_position=camera_position,
+                camera_position=const.camera_position,
                 # 背景设置为灰色
-                clear_color=background_color,
+                clear_color=const.background_color,
             )
 
             # bbox选择模块
@@ -156,10 +159,10 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=theme, css=open("resour
                 # bbox颜色选择器+线宽
                 with gr.Row():
                     # 颜色选择器
-                    bbox_color_picker2 = gr.ColorPicker(label="Bbox Color", value=bbox_color, scale=1)
+                    bbox_color_picker2 = gr.ColorPicker(label="Bbox Color", value=const.bbox_color, scale=1)
                     # bbox 线宽
                     bbox_line_width_slider2 = gr.Slider(minimum=0.01, maximum=0.1,
-                                                        value=bbox_line_width, label="Bbox Line Width", scale=4)
+                                                        value=const.bbox_line_width, label="Bbox Line Width", scale=4)
                     download_button2 = gr.DownloadButton(label="Download Scene", scale=1)
 
                 with gr.Row():
@@ -192,21 +195,21 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=theme, css=open("resour
 
     # 事件绑定
     tab1_dropdown_scene.change(
-        fn=select_scene,
+        fn=bind_func.select_scene,
         inputs=[session_state, tab1_dropdown_scene],
         outputs=[session_state, model_3d, download_button],
     )
 
     # 提交按钮
     submit_button.click(
-        fn=partial(submit_bbox_params, btn_id='tab1'),
+        fn=partial(bind_func.submit_bbox_params, btn_id='tab1'),
         inputs=[session_state, bbox_color_picker, bbox_line_width_slider,
                 bbox_numpy_file, checkgroup, bbox_text, bbox_table],
         outputs=[session_state, model_3d, download_button],
     )
 
     submit_button2.click(
-        fn=partial(submit_bbox_params, btn_id='tab2'),
+        fn=partial(bind_func.submit_bbox_params, btn_id='tab2'),
         inputs=[session_state, bbox_color_picker2, bbox_line_width_slider2,
                 bbox_numpy_file2, axis_aligned_matrix_file2, bbox_text2, bbox_table2],
         outputs=[session_state, model_display, download_button2],
@@ -214,14 +217,14 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=theme, css=open("resour
 
     # 清除按钮
     clear_button.click(
-        fn=partial(clear_bbox_params, clear_btn_id="tab1"),
+        fn=partial(bind_func.clear_bbox_params, clear_btn_id="tab1"),
         inputs=[session_state, ],
         outputs=[session_state, model_3d, download_button, checkgroup, bbox_color_picker, bbox_line_width_slider,
                  bbox_numpy_file, bbox_text, bbox_table],
     )
 
     clear_button2.click(
-        fn=partial(clear_bbox_params, clear_btn_id="tab2"),
+        fn=partial(bind_func.clear_bbox_params, clear_btn_id="tab2"),
         inputs=[session_state, ],
         outputs=[session_state, model_display, download_button2, checkgroup, bbox_color_picker2,
                  bbox_line_width_slider2,
@@ -229,19 +232,19 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=theme, css=open("resour
     )
 
     download_button.click(
-        fn=download_scene,
+        fn=bind_func.download_scene,
         inputs=[model_3d, download_button],
         outputs=[download_button]
     )
 
     download_button2.click(
-        fn=download_scene,
+        fn=bind_func.download_scene,
         inputs=[model_display, download_button2],
         outputs=[download_button2]
     )
 
     model_display.change(
-        fn=upload_scene,
+        fn=bind_func.upload_scene,
         inputs=[session_state, model_display],
         outputs=[session_state, model_display, download_button2],
     )
