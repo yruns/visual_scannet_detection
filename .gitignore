@@ -4,6 +4,8 @@ data/scene/**
 
 data/temp/**
 
+logs/
+
 flagged/**
 
 .idea/**

@@ -1,25 +1,7 @@
-import gradio as gr
+import numpy as np
 
-with gr.Blocks() as demo:
-    text_count = gr.State(1)
-    add_btn = gr.Button("Add Box")
-    add_btn.click(lambda x: x + 1, text_count, text_count)
+data = np.load("/Users/yruns/Downloads/scene0444_00_aligned_bbox_pg.npy")
 
+data_gt = np.load("/Users/yruns/Downloads/scene0444_00_aligned_bbox.npy")
 
-    @gr.render(inputs=text_count)
-    def render_count(count):
-        boxes = []
-        for i in range(count):
-            box = gr.Textbox(key=i, label=f"Box {i}")
-            boxes.append(box)
-
-        def merge(*args):
-            return " ".join(args)
-
-        merge_btn.click(merge, boxes, output)
-
-
-    merge_btn = gr.Button("Merge")
-    output = gr.Textbox(label="Merged Output")
-
-demo.launch()
+print(data.shape)

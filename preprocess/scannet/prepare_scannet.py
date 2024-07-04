@@ -128,8 +128,8 @@ def export(mesh_file, agg_file, seg_file, meta_file, label_map_file, pointgroup_
             if len(obj_pc) == 0: continue
             bbox = scannet_utils.compute_bbox(obj_pc)
             # concatenate label id and instance id
-            bbox = np.concatenate((bbox, [cls, inst_id - 1]))
-            aligned_instance_bboxes_pg[inst_id - 1, :] = bbox
+            bbox = np.concatenate((bbox, [cls, inst_id]))
+            aligned_instance_bboxes_pg[inst_id, :] = bbox
 
         return_values.extend([label_ids_pg, instance_ids_pg, aligned_instance_bboxes_pg])
 
