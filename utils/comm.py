@@ -8,9 +8,11 @@ Description: This file contains ...
 
 import hashlib
 import os
+import platform
 import pickle
 import time
 from collections import deque
+from enum import Enum
 
 import numpy as np
 
@@ -41,6 +43,21 @@ class TempFile(object):
         if os.path.exists(self.file_path):
             print(f"Removing temp file: {self.file_path}")
             os.remove(self.file_path)
+
+class OsType(Enum):
+    Linux = "Linux"
+    MacOS = "Darwin"
+    Other = "Other"
+
+
+def get_system_type():
+    system = platform.system()
+    if system == "Linux":
+        return OsType.Linux
+    elif system == "Darwin":
+        return OsType.MacOS
+    else:
+        return OsType.Other
 
 
 def generate_hash(*args):

@@ -25,7 +25,8 @@ os.makedirs(temp_path, exist_ok=True)
 
 # Tab1 checkgroup选项
 axis_aligned_option = "Axis-Aligned"
-checkgroup_options = [axis_aligned_option, "Show Bbox"]
+show_axis = "Show Axis"
+checkgroup_options = [axis_aligned_option, show_axis]
 default_checkgroup_options = [axis_aligned_option]
 
 
@@ -42,6 +43,11 @@ standby_bbox_color = ["#F12C1E", "#48E845", "#9372EE"]
 
 # 默认bbox线宽
 bbox_line_width = 0.03
+
+# 渲染投影默认背景颜色及其尺寸
+camera_model_path = "resources/camera.ply"
+render_projection_background_color = [0.95, 0.95, 0.95, 1]  # 在MacOS平台上，透明度1不生效
+render_projection_size = (1920, 1080)
 
 # prettify前缀
 prettify_prefix = "prettify_"

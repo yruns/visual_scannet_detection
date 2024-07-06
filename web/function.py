@@ -92,7 +92,7 @@ def clear_add_box(session_state, *bbox_params):
     )
 
 def submit_bbox_params(session_state, bbox_color, bbox_line_width, bbox_numpy_file, checkgroup,
-                       bbox_text, bbox_table, btn_id):
+                       bbox_text, camera_pos, camera_lookat, btn_id):
     # 读取bbox_numpy_file文件
     bbox_numpy, axis_align_matrix = None, None
     if bbox_numpy_file is not None:
@@ -106,22 +106,22 @@ def submit_bbox_params(session_state, bbox_color, bbox_line_width, bbox_numpy_fi
         else:
             gr.Warning("A meta file is not found for the scene {}".format(session_state[const.original_scene_path].split("/")[-2]))
 
+    # 处理Picture Taker
     try:
-        bbox_params = bbox_table.astype(np.float32)[:, :6]
-    except ValueError:
-        logger.info(f"bbox_table is not valid, ignore it.\n" + str(bbox_table))
-        if not (bbox_table == "").all():
-            gr.Warning('Tablebox is not valid, ignore it.')
-        bbox_params = None
-
-    if bbox_params is not None:
-        bbox_numpy = np.concatenate([bbox_numpy, bbox_params], axis=0) if bbox_numpy is not None else bbox_params
+        camera_pos = process_2d_text_table(camera_pos)[0]
+        assert camera_pos.shape == (3,), "camera_pos.shape = {}".format(camera_pos.shape)
+        camera_lookat = process_2d_text_table(camera_lookat)[0]
+        assert camera_lookat.shape == (3,), "camera_lookat.shape = {}".format(camera_lookat.shape)
+    except Exception:
+        logger.info(f"camera_pos or camera_lookat is not valid, ignore it.\n" + camera_pos + "\n" + camera_lookat)
+        if not (camera_pos == "" and camera_lookat == ""):
+            gr.Warning('Camera position or camera lookat is not valid, ignore it.')
 
     # 处理bbox_text
     try:
         bbox_params = process_2d_text_table(bbox_text)[:, :6]
         assert bbox_params.shape[1] >= 6
-    except ValueError:
+    except Exception:
         logger.info(f"bbox_text is not valid, ignore it.\n" + bbox_text)
         if bbox_text != "":
             gr.Warning('Textbox is not valid, ignore it.')
@@ -150,18 +150,21 @@ def submit_bbox_params(session_state, bbox_color, bbox_line_width, bbox_numpy_fi
                         "bbox_params": bbox_params,
                     })
                 except Exception:
-                    logger.info(f"bbox_text is not valid, ignore it.\n" + bbox["array_str"])
+                    logger.info(f"add bbox is not valid, ignore it.\n" + bbox["array_str"])
                     continue
 
-    new_scene_path = create_scene_with_bbox(
+    new_scene_path, projcetion_path = create_scene_with_bbox(
         session_state[const.original_scene_path] if btn_id == 'tab1' else session_state[const.upload_scene_path],
         bboxes,
         axis_align_matrix,
-        bbox_line_width
+        const.show_axis in checkgroup,
+        bbox_line_width,
+        camera_lookat if isinstance(camera_lookat, np.ndarray) else None,
+        camera_pos if isinstance(camera_pos, np.ndarray) else None
     )
 
     return (
-        session_state, new_scene_path, new_scene_path
+        session_state, new_scene_path, new_scene_path, projcetion_path
     )
 
 
@@ -174,6 +177,7 @@ def clear_bbox_params(session_state, clear_btn_id):
         const.default_checkgroup_options,
         const.bbox_color,
         const.bbox_line_width,
+        None,
         None,
         None,
         None,

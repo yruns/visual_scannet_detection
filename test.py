@@ -1,7 +1,13 @@
-import numpy as np
+import platform
 
-data = np.load("/Users/yruns/Downloads/scene0444_00_aligned_bbox_pg.npy")
+def get_system_type():
+    system = platform.system()
+    if system == "Linux":
+        return "Linux"
+    elif system == "Darwin":
+        return "macOS"
+    else:
+        return "Other"
 
-data_gt = np.load("/Users/yruns/Downloads/scene0444_00_aligned_bbox.npy")
-
-print(data.shape)
+system_type = get_system_type()
+print(f"The current system is: {system_type}")

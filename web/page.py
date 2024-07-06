@@ -69,40 +69,60 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=const.theme, css=open("
                                     clear_button = gr.Button(value="Clear", scale=3)
 
                             with gr.Row():
-                                with gr.Tabs(selected=0, elem_classes="bbox_tabs"):
+                                with gr.Tabs(selected="Picture Taker", elem_classes="bbox_tabs"):
                                     with gr.Tab("Add box"):
                                         with gr.Row():
-                                            box_nums = gr.Slider(minimum=1, maximum=len(const.standby_bbox_color), value=1, step=1,
-                                                                 label="Number of boxes you want to add", scale=6)
-                                            with gr.Column(scale=2, min_width=100):
-                                                add_btn = gr.Button(value="Add", scale=2, variant="primary", elem_id="add_box", visible=False)
-                                                clear_add_btn = gr.Button(value="Remove", scale=2)
-
-
-                                        @gr.render(inputs=box_nums)
-                                        def render_box_want_to_add(box_nums):
-                                            add_items = []
-                                            for i in range(box_nums):
+                                            with gr.Column():
                                                 with gr.Row():
-                                                    picker_ = gr.ColorPicker(label=f"Color {i + 1}", value=const.standby_bbox_color[i], scale=1,
-                                                                   min_width=90, interactive=True),
-                                                    textbox_ = gr.Textbox(label=f"Box {i + 1}", scale=6, interactive=True, key=i,
-                                                               placeholder="bbox, eg. [ 1.48  3.52  1.85  1.74 0.231  0.572 ]"),
-                                                    checkbox_ = gr.Checkbox(label="render", scale=1, value=True, interactive=True, min_width=90)
-                                                add_items.extend([picker_, textbox_, checkbox_])
-
-                                            add_btn.click(
-                                                fn=bind_func.submit_add_box,
-                                                inputs=[session_state] + [item[0] if isinstance(item, tuple) else item for item in add_items],
-                                                outputs=[session_state]
-                                            )
-                                            clear_add_btn.click(
-                                                fn=bind_func.clear_add_box,
-                                                inputs=[session_state] + [item[0] if isinstance(item, tuple) else item for item in add_items],
-                                                outputs=[session_state] + [item[0] if isinstance(item, tuple) else item for item in add_items]
-                                            )
+                                                    box_nums = gr.Slider(minimum=1, maximum=len(const.standby_bbox_color), value=1, step=1,
+                                                                         label="Number of boxes you want to add", scale=6)
+                                                    with gr.Column(scale=2, min_width=100):
+                                                        add_btn = gr.Button(value="Add", scale=2, variant="primary", elem_id="add_box", visible=False)
+                                                        clear_add_btn = gr.Button(value="Remove", scale=2)
 
 
+                                                @gr.render(inputs=box_nums)
+                                                def render_box_want_to_add(box_nums):
+                                                    add_items = []
+                                                    for i in range(box_nums):
+                                                        with gr.Row():
+                                                            picker_ = gr.ColorPicker(label=f"Color {i + 1}", value=const.standby_bbox_color[i], scale=1,
+                                                                           min_width=90, interactive=True),
+                                                            textbox_ = gr.Textbox(label=f"Box {i + 1}", scale=6, interactive=True, key=i,
+                                                                       placeholder="bbox, eg. [ 1.48  3.52  1.85  1.74 0.231  0.572 ]"),
+                                                            checkbox_ = gr.Checkbox(label="render", scale=1, value=True, interactive=True, min_width=90)
+                                                        add_items.extend([picker_, textbox_, checkbox_])
+
+                                                    add_btn.click(
+                                                        fn=bind_func.submit_add_box,
+                                                        inputs=[session_state] + [item[0] if isinstance(item, tuple) else item for item in add_items],
+                                                        outputs=[session_state]
+                                                    )
+                                                    clear_add_btn.click(
+                                                        fn=bind_func.clear_add_box,
+                                                        inputs=[session_state] + [item[0] if isinstance(item, tuple) else item for item in add_items],
+                                                        outputs=[session_state] + [item[0] if isinstance(item, tuple) else item for item in add_items]
+                                                    )
+
+
+                                            with gr.Column(elem_classes="bbox_upload"):
+                                                # bbox文件上传
+                                                bbox_numpy_file = gr.File(
+                                                    label="Upload Bbox(only support .npy file)",
+                                                    type="filepath",
+                                                    scale=1)
+                                                with gr.Accordion(label="Examples for bbox numpy file:",
+                                                                  open=False):
+                                                    gr.Examples(
+                                                        examples=[
+                                                            choice.replace("vh_clean_2.obj",
+                                                                           "aligned_bbox.npy").replace(
+                                                                const.prettify_prefix, "")
+                                                            for choice in scene_choice
+                                                        ],
+                                                        inputs=bbox_numpy_file,
+
+                                                    )
 
                                     with gr.Tab("Textbox"):
                                         # bbox表格
@@ -119,33 +139,20 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=const.theme, css=open("
                                                 ],
                                                 inputs=bbox_text,
                                             )
-                                    with gr.Tab("Table"):
-                                        # bbox表格
-                                        bbox_table = gr.Dataframe(
-                                            headers=["x", "y", "z", "dx", "dy", "dz"],
-                                            row_count=(1, "dynamic"),
-                                            col_count=6,
-                                            type="numpy",
-                                            label="Bbox Table",
-                                            scale=5,
-                                        )
+                                    with gr.Tab("Picture Taker"):
+                                        with gr.Row():
+                                            # Picture Taker
+                                            with gr.Column():
+                                                camera_pos = gr.Textbox(label="Camera Position", lines=1, scale=1, placeholder="eg. [2, 2, 1.6]")
+                                                camera_lookat = gr.Textbox(label="Camera Lookat", lines=1, scale=1, placeholder="eg. [-2, -1, 1.6]")
+                                                camera_param_example = gr.Examples(
+                                                    examples=[
+                                                        ["[2, 2, 1.6]", "[-2, -1, 1.6]"],
+                                                    ],
+                                                    inputs=[camera_pos, camera_lookat],
+                                                )
+                                            projection = gr.Image(label="Projection", type="filepath", scale=1, interactive=False)
 
-
-                                with gr.Column(elem_classes="bbox_upload"):
-                                    # bbox文件上传
-                                    bbox_numpy_file = gr.File(label="Upload Bbox(only support .npy file)",
-                                                              type="filepath",
-                                                              scale=1)
-                                    with gr.Accordion(label="Examples for bbox numpy file:", open=False):
-                                        gr.Examples(
-                                            examples=[
-                                                choice.replace("vh_clean_2.obj", "aligned_bbox.npy").replace(
-                                                    const.prettify_prefix, "")
-                                                for choice in scene_choice
-                                            ],
-                                            inputs=bbox_numpy_file,
-
-                                        )
 
         with gr.Tab("Upload Scene"):
             model_display = gr.Model3D(
@@ -204,32 +211,32 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=const.theme, css=open("
     submit_button.click(
         fn=partial(bind_func.submit_bbox_params, btn_id='tab1'),
         inputs=[session_state, bbox_color_picker, bbox_line_width_slider,
-                bbox_numpy_file, checkgroup, bbox_text, bbox_table],
-        outputs=[session_state, model_3d, download_button],
+                bbox_numpy_file, checkgroup, bbox_text, camera_pos, camera_lookat],
+        outputs=[session_state, model_3d, download_button, projection],
     )
 
-    submit_button2.click(
-        fn=partial(bind_func.submit_bbox_params, btn_id='tab2'),
-        inputs=[session_state, bbox_color_picker2, bbox_line_width_slider2,
-                bbox_numpy_file2, axis_aligned_matrix_file2, bbox_text2, bbox_table2],
-        outputs=[session_state, model_display, download_button2],
-    )
+    # submit_button2.click(
+    #     fn=partial(bind_func.submit_bbox_params, btn_id='tab2'),
+    #     inputs=[session_state, bbox_color_picker2, bbox_line_width_slider2,
+    #             bbox_numpy_file2, axis_aligned_matrix_file2, bbox_text2, bbox_table2],
+    #     outputs=[session_state, model_display, download_button2],
+    # )
 
     # 清除按钮
     clear_button.click(
         fn=partial(bind_func.clear_bbox_params, clear_btn_id="tab1"),
         inputs=[session_state, ],
         outputs=[session_state, model_3d, download_button, checkgroup, bbox_color_picker, bbox_line_width_slider,
-                 bbox_numpy_file, bbox_text, bbox_table],
+                 bbox_numpy_file, bbox_text, camera_pos, camera_lookat, projection],
     )
 
-    clear_button2.click(
-        fn=partial(bind_func.clear_bbox_params, clear_btn_id="tab2"),
-        inputs=[session_state, ],
-        outputs=[session_state, model_display, download_button2, checkgroup, bbox_color_picker2,
-                 bbox_line_width_slider2,
-                 bbox_numpy_file2, axis_aligned_matrix_file2, bbox_text2, bbox_table2],
-    )
+    # clear_button2.click(
+    #     fn=partial(bind_func.clear_bbox_params, clear_btn_id="tab2"),
+    #     inputs=[session_state, ],
+    #     outputs=[session_state, model_display, download_button2, checkgroup, bbox_color_picker2,
+    #              bbox_line_width_slider2,
+    #              bbox_numpy_file2, axis_aligned_matrix_file2, bbox_text2, bbox_table2],
+    # )
 
     download_button.click(
         fn=bind_func.download_scene,
