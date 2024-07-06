@@ -25,10 +25,9 @@ os.makedirs(temp_path, exist_ok=True)
 
 # Tab1 checkgroup选项
 axis_aligned_option = "Axis-Aligned"
-show_axis = "Show Axis"
-checkgroup_options = [axis_aligned_option, show_axis]
+show_axis_option = "Show Axis"
+checkgroup_options = [axis_aligned_option, show_axis_option]
 default_checkgroup_options = [axis_aligned_option]
-
 
 # gr.Model3D背景颜色
 background_color = (0.95, 0.95, 0.95, 1.0)
@@ -48,6 +47,12 @@ bbox_line_width = 0.03
 camera_model_path = "resources/camera.ply"
 render_projection_background_color = [0.95, 0.95, 0.95, 1]  # 在MacOS平台上，透明度1不生效
 render_projection_size = (1920, 1080)
+
+scene_only_option = "Scene-Only"
+sharp_option = "Sharp"
+precise_option = "Precise"
+render_checkgroup_options = ["Scene-Only", "Sharp", "Precise"]
+default_render_checkgroup_options = ["Scene-Only"]
 
 # prettify前缀
 prettify_prefix = "prettify_"

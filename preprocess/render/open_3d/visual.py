@@ -38,7 +38,6 @@ def create_cylinder_mesh(p0, p1, color, radius=0.02, resolution=50, split=1):
     cylinder.paint_uniform_color(color)
     return cylinder
 
-
 def cylinder_frame(p0, p1):
     """Calculate the transformation matrix to position a unit cylinder between two points."""
     direction = np.asarray(p1) - np.asarray(p0)
@@ -66,27 +65,16 @@ ply_filename = "scene0000_00_vh_clean_2.ply"
 pcd = o3d.io.read_triangle_mesh(ply_filename)
 
 # 将mesh按照axis_align_matrix进行变换
-# axis_align_matrix = read_axis_align_matrix("scene0000_00.txt")
-# mesh_vertices = np.asarray(pcd.vertices)
-# aligned_vertices = align_point_vertices(mesh_vertices, axis_align_matrix)
-# pcd.vertices = o3d.utility.Vector3dVector(aligned_vertices)
+axis_align_matrix = read_axis_align_matrix("scene0000_00.txt")
+mesh_vertices = np.asarray(pcd.vertices)
+aligned_vertices = align_point_vertices(mesh_vertices, axis_align_matrix)
+pcd.vertices = o3d.utility.Vector3dVector(aligned_vertices)
 
-# camera_pos = [-0.5, 1, 1.5]
-# camera_look_at = [-2.4, -0.4, 0.5]
-
-camera_pos = [6, 6, 1.6]
-camera_look_at = [3, 3, 1.6]
-
-# 添加一条线，表示相机方向
-# line_set = o3d.geometry.LineSet()
-# line_set.points = o3d.utility.Vector3dVector([camera_pos, camera_look_at])
-# line_set.lines = o3d.utility.Vector2iVector([[0, 1]])
-# # 设置粗细
-# line_set.paint_uniform_color([0, 1, 0])  # 红色
+camera_pos = [-3, 1.3, 1.6]
+camera_look_at = [2, 1.3, 1.6]
 
 line_set = create_cylinder_mesh(camera_pos, camera_look_at, [0, 1, 0], radius=0.02, resolution=50, split=1)
 pcd += line_set
-
 
 # 在场景中画出相机方向
 camera_model = o3d.io.read_triangle_mesh("camera.ply")

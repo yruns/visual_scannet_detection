@@ -1,3 +1,4 @@
+import copy
 import os
 import queue
 import time
@@ -16,7 +17,7 @@ from utils.scannet import align_point_vertices
 
 def create_scene_with_bbox(
         scene_path, bboxes, axis_align_matrix, show_axis, bbox_line_width,
-        camera_lookat, camera_pos
+        camera_lookat, camera_pos, render_checkgroup
 ):
     if has_prefix(scene_path, const.prettify_prefix):
         scene_path = remove_prefix(scene_path, const.prettify_prefix)
@@ -28,6 +29,10 @@ def create_scene_with_bbox(
         mesh_vertices = np.asarray(mesh.vertices)
         aligned_vertices = align_point_vertices(mesh_vertices, axis_align_matrix)
         mesh.vertices = o3d.utility.Vector3dVector(aligned_vertices)
+
+    mesh_scene_only = None
+    if const.scene_only_option in render_checkgroup:
+        mesh_scene_only = copy.deepcopy(mesh)
 
     # 添加坐标轴
     if show_axis:
@@ -47,22 +52,10 @@ def create_scene_with_bbox(
     # 添加相机
     if camera_lookat is not None and camera_pos is not None:
         camera_model, camera_look_at_sphere, line_set = create_camera_with_lookat(camera_pos, camera_lookat)
-        mesh_path = os.path.join(const.temp_path, f"{uuid.uuid4()}.obj")
-        o3d.io.write_triangle_mesh(mesh_path, mesh, write_vertex_colors=True)
-
-        def render_callback(render_result) -> None:
-            # this function is called when the renderer finishes
-            nonlocal projection_path
-            projection_path = render_result
-
-        threading.Thread(
-            target=render_projection,
-            args=(mesh_path, camera_pos, camera_lookat, render_callback,)
-        ).start()
-        while projection_path is None:
-            time.sleep(0.2)
-            print("Waiting for projection to be rendered...")
-
+        projection_path = render_projection(
+            mesh_scene_only if const.scene_only_option in render_checkgroup else mesh,
+            camera_pos, camera_lookat, render_checkgroup
+        )
         mesh += (camera_model + camera_look_at_sphere + line_set)
 
     mesh = prettify_mesh_for_gradio(mesh)
@@ -75,10 +68,11 @@ def create_scene_with_bbox(
     return model3d_path, projection_path
 
 
-def render_projection_macos(mesh, camera_pos, camera_lookat):
-    mesh.compute_vertex_normals()
+def render_projection_macos(mesh, camera_pos, camera_lookat, render_checkgroup):
+    if const.sharp_option in render_checkgroup:
+        mesh.compute_vertex_normals()
     vis = o3d.visualization.Visualizer()
-    vis.create_window(visible=False)
+    vis.create_window(height=const.render_projection_size[1], width=const.render_projection_size[0], visible=False)
     vis.add_geometry(mesh)
 
     # 设置摄像头参数
@@ -127,13 +121,15 @@ def render_projection_linux(mesh, camera_pos, camera_lookat):
     return file_path
 
 
-def render_projection(mesh_path, camera_pos, camera_lookat, render_callback):
+def render_projection(mesh, camera_pos, camera_lookat, render_checkgroup):
     os_type = comm.get_system_type()
-    mesh = o3d.io.read_triangle_mesh(mesh_path)
     if os_type == comm.OsType.MacOS:
-        render_callback(render_projection_macos(mesh, camera_pos, camera_lookat))
+        return render_projection_macos(mesh, camera_pos, camera_lookat, render_checkgroup)
     elif os_type == comm.OsType.Linux:
-        render_callback(render_projection_linux(mesh, camera_pos, camera_lookat))
+        if const.precise_option in render_checkgroup:
+            return render_projection_linux(mesh, camera_pos, camera_lookat)
+        else:
+            return render_projection_macos(mesh, camera_pos, camera_lookat, render_checkgroup)
     else:
         raise NotImplementedError(f"Unsupported OS type: {os_type} for rendering projection")
 

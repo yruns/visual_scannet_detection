@@ -92,7 +92,7 @@ def clear_add_box(session_state, *bbox_params):
     )
 
 def submit_bbox_params(session_state, bbox_color, bbox_line_width, bbox_numpy_file, checkgroup,
-                       bbox_text, camera_pos, camera_lookat, btn_id):
+                       bbox_text, camera_pos, camera_lookat, render_checkgroup, btn_id):
     # 读取bbox_numpy_file文件
     bbox_numpy, axis_align_matrix = None, None
     if bbox_numpy_file is not None:
@@ -157,10 +157,11 @@ def submit_bbox_params(session_state, bbox_color, bbox_line_width, bbox_numpy_fi
         session_state[const.original_scene_path] if btn_id == 'tab1' else session_state[const.upload_scene_path],
         bboxes,
         axis_align_matrix,
-        const.show_axis in checkgroup,
+        const.show_axis_option in checkgroup,
         bbox_line_width,
         camera_lookat if isinstance(camera_lookat, np.ndarray) else None,
-        camera_pos if isinstance(camera_pos, np.ndarray) else None
+        camera_pos if isinstance(camera_pos, np.ndarray) else None,
+        render_checkgroup
     )
 
     return (
@@ -181,5 +182,6 @@ def clear_bbox_params(session_state, clear_btn_id):
         None,
         None,
         None,
-        None
+        None,
+        const.default_render_checkgroup_options
     )

@@ -142,16 +142,23 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=const.theme, css=open("
                                     with gr.Tab("Picture Taker"):
                                         with gr.Row():
                                             # Picture Taker
-                                            with gr.Column():
-                                                camera_pos = gr.Textbox(label="Camera Position", lines=1, scale=1, placeholder="eg. [2, 2, 1.6]")
-                                                camera_lookat = gr.Textbox(label="Camera Lookat", lines=1, scale=1, placeholder="eg. [-2, -1, 1.6]")
+                                            with gr.Column(scale=44):
+                                                render_checkgroup = gr.CheckboxGroup(
+                                                    choices=const.render_checkgroup_options,
+                                                    value=const.default_render_checkgroup_options,
+                                                    label="Render Settings"
+                                                )
+                                                camera_pos = gr.Textbox(label="Camera Position", lines=1, placeholder="eg. [2, 2, 1.6]")
+                                                camera_lookat = gr.Textbox(label="Camera Lookat", lines=1, placeholder="eg. [-2, -1, 1.6]")
+
                                                 camera_param_example = gr.Examples(
                                                     examples=[
                                                         ["[2, 2, 1.6]", "[-2, -1, 1.6]"],
+                                                        ["[-2.5, 1.3, 1.6]", "[2, 1.3, 1.6]"]
                                                     ],
                                                     inputs=[camera_pos, camera_lookat],
                                                 )
-                                            projection = gr.Image(label="Projection", type="filepath", scale=1, interactive=False)
+                                            projection = gr.Image(label="Projection", scale=56, type="filepath", interactive=False)
 
 
         with gr.Tab("Upload Scene"):
@@ -211,7 +218,7 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=const.theme, css=open("
     submit_button.click(
         fn=partial(bind_func.submit_bbox_params, btn_id='tab1'),
         inputs=[session_state, bbox_color_picker, bbox_line_width_slider,
-                bbox_numpy_file, checkgroup, bbox_text, camera_pos, camera_lookat],
+                bbox_numpy_file, checkgroup, bbox_text, camera_pos, camera_lookat, render_checkgroup],
         outputs=[session_state, model_3d, download_button, projection],
     )
 
@@ -227,7 +234,7 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=const.theme, css=open("
         fn=partial(bind_func.clear_bbox_params, clear_btn_id="tab1"),
         inputs=[session_state, ],
         outputs=[session_state, model_3d, download_button, checkgroup, bbox_color_picker, bbox_line_width_slider,
-                 bbox_numpy_file, bbox_text, camera_pos, camera_lookat, projection],
+                 bbox_numpy_file, bbox_text, camera_pos, camera_lookat, projection, render_checkgroup],
     )
 
     # clear_button2.click(
