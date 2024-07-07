@@ -153,7 +153,7 @@ def submit_bbox_params(session_state, bbox_color, bbox_line_width, bbox_numpy_fi
                     logger.info(f"add bbox is not valid, ignore it.\n" + bbox["array_str"])
                     continue
 
-    new_scene_path, projcetion_path = create_scene_with_bbox(
+    new_scene_path, projection = create_scene_with_bbox(
         session_state[const.original_scene_path] if btn_id == 'tab1' else session_state[const.upload_scene_path],
         bboxes,
         axis_align_matrix,
@@ -165,7 +165,7 @@ def submit_bbox_params(session_state, bbox_color, bbox_line_width, bbox_numpy_fi
     )
 
     return (
-        session_state, new_scene_path, new_scene_path, projcetion_path
+        session_state, new_scene_path, new_scene_path, projection
     )
 
 

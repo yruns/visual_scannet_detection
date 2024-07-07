@@ -48,14 +48,16 @@ def create_scene_with_bbox(
                 for box_line in bbox_lineset:
                     mesh += box_line
 
-    projection_path = None
+    projection = None
     # 添加相机
     if camera_lookat is not None and camera_pos is not None:
         camera_model, camera_look_at_sphere, line_set = create_camera_with_lookat(camera_pos, camera_lookat)
-        projection_path = render_projection(
+        projection = render_projection(
             mesh_scene_only if const.scene_only_option in render_checkgroup else mesh,
             camera_pos, camera_lookat, render_checkgroup
         )
+        # to numpy
+        projection = np.asarray(projection)
         mesh += (camera_model + camera_look_at_sphere + line_set)
 
     mesh = prettify_mesh_for_gradio(mesh)
@@ -65,7 +67,7 @@ def create_scene_with_bbox(
     o3d.io.write_triangle_mesh(model3d_path, mesh, write_vertex_colors=True)
     agent.add_temp_file(TempFile(model3d_path))
 
-    return model3d_path, projection_path
+    return model3d_path, projection
 
 
 def render_projection_macos(mesh, camera_pos, camera_lookat, render_checkgroup):
@@ -91,11 +93,12 @@ def render_projection_macos(mesh, camera_pos, camera_lookat, render_checkgroup):
     vis.update_renderer()
 
     # 捕捉图像
-    file_path = os.path.join(const.temp_path, f"{uuid.uuid4()}.png")
-    vis.capture_screen_image(file_path, do_render=True)
+    # file_path = os.path.join(const.temp_path, f"{uuid.uuid4()}.png")
+    # vis.capture_screen_image(file_path, do_render=True)
+    image = vis.capture_screen_float_buffer(do_render=True)
     vis.destroy_window()
 
-    return file_path
+    return image
 
 
 def render_projection_linux(mesh, camera_pos, camera_lookat):
@@ -115,10 +118,10 @@ def render_projection_linux(mesh, camera_pos, camera_lookat):
     # render.scene.show_axes(True)
 
     img = render.render_to_image()
-    file_path = os.path.join(const.temp_path, f"{uuid.uuid4()}.png")
-    o3d.io.write_image(file_path, img, 9)
+    # file_path = os.path.join(const.temp_path, f"{uuid.uuid4()}.png")
+    # o3d.io.write_image(file_path, img, 9)
 
-    return file_path
+    return img
 
 
 def render_projection(mesh, camera_pos, camera_lookat, render_checkgroup):
