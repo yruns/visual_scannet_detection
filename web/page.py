@@ -158,7 +158,7 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=const.theme, css=open("
                                                     ],
                                                     inputs=[camera_pos, camera_lookat],
                                                 )
-                                            projection = gr.Image(label="Projection", scale=56, type="numpy", interactive=False)
+                                            projection = gr.Image(label="Projection", scale=56, type="numpy", format="png", interactive=False)
 
 
         with gr.Tab("Upload Scene"):

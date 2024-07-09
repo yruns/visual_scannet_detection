@@ -47,12 +47,13 @@ bbox_line_width = 0.03
 camera_model_path = "resources/camera.ply"
 render_projection_background_color = [0.95, 0.95, 0.95, 1]  # 在MacOS平台上，透明度1不生效
 render_projection_size = (1920, 1080)
+render_zoom = 0.45
 
 scene_only_option = "Scene-Only"
 sharp_option = "Sharp"
 precise_option = "Precise"
 render_checkgroup_options = ["Scene-Only", "Sharp", "Precise"]
-default_render_checkgroup_options = ["Scene-Only"]
+default_render_checkgroup_options = ["Scene-Only", ]
 
 # prettify前缀
 prettify_prefix = "prettify_"

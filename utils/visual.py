@@ -80,9 +80,9 @@ def render_projection_macos(mesh, camera_pos, camera_lookat, render_checkgroup):
     # 设置摄像头参数
     ctr = vis.get_view_control()
     ctr.set_up([0, 0, 1])
-    ctr.set_front(camera_pos)
+    ctr.set_front(camera_pos - camera_lookat)
     ctr.set_lookat(camera_lookat)
-    ctr.set_zoom(0.5)
+    ctr.set_zoom(const.render_zoom)
 
     # 设置渲染选项
     opt = vis.get_render_option()
@@ -114,8 +114,7 @@ def render_projection_linux(mesh, camera_pos, camera_lookat):
     render.scene.add_geometry("mesh", mesh, grey)
     render.setup_camera(70.0, camera_lookat, camera_pos, [0, 0, 1])
     render.scene.scene.set_sun_light([0.707, 0.0, -.707], [1.0, 1.0, 1.0], 75000)
-    render.scene.scene.enable_sun_light(True)
-    # render.scene.show_axes(True)
+    render.scene.scene.enable_sun_light(False)
 
     img = render.render_to_image()
     # file_path = os.path.join(const.temp_path, f"{uuid.uuid4()}.png")

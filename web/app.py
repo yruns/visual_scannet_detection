@@ -2,7 +2,7 @@ from web.page import demo
 import argparse
 
 args = argparse.ArgumentParser()
-args.add_argument("--port", type=int, default=7005)
+args.add_argument("--port", type=int, default=7010)
 args = args.parse_args()
 
 demo.launch(
