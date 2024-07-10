@@ -21,7 +21,7 @@ mesh.vertices = o3d.utility.Vector3dVector(aligned_vertices)
 mesh.compute_vertex_normals()
 
 render.scene.add_geometry("mesh", mesh, grey)
-render.setup_camera(70.0, [1, 1.5, 1.6], [-2, -2, 1.6], [0, 0, 1])
+render.setup_camera(70.0, [1, 1, 1.6], [-2, -2, 1.6], [0, 0, 1])
 # render.scene.scene.set_sun_light([0.707, 0.0, -.707], [1.0, 1.0, 1.0], 75000)
 render.scene.scene.enable_sun_light(True)
 
@@ -38,11 +38,41 @@ bbox = o3d.geometry.AxisAlignedBoundingBox(
 bbox_corners = np.asarray(bbox.get_box_points())
 # 计算bbox在此视角下的投影坐标
 
-# Transform the bbox corners to the camera view
-camera: o3d.visualization.rendering.Camera = render.scene.camera
+# # Transform the bbox corners to the camera view
+# camera: o3d.visualization.rendering.Camera = render.scene.camera
 
-# o3d.camera.PinholeCameraParameters()
-# o3d.visualization.rendering.Camera()
+vis = o3d.visualization.Visualizer()
+vis.create_window(visible=False, height=1080, width=1920)
+# 设置摄像头参数
+ctr: o3d.visualization.ViewControl = vis.get_view_control()
+
+camera_pos = np.array([-2, -2, 1.6])
+camera_lookat = np.array([1, 1.5, 1.6])
+up = np.array([0, 0, 1])
+front_vector = camera_pos - camera_lookat
+
+ctr.set_up(up)
+ctr.set_front(front_vector)
+ctr.set_lookat(camera_lookat)
+ctr.set_zoom(0.45)
+
+# 创建一个PinholeCameraParameters对象
+pinhole_camera_params = ctr.convert_to_pinhole_camera_parameters()
+
+# 创建一个Camera对象
+camera = o3d.visualization.rendering.Camera()
+
+# 将PinholeCameraParameters的内参和外参应用到Camera对象
+camera.look_at(pinhole_camera_params.extrinsic[:3, 3],  # 相机位置
+               pinhole_camera_params.extrinsic[:3, 2],  # 目标点
+               pinhole_camera_params.extrinsic[:3, 1])  # 上向量
+
+# 设置Camera的投影矩阵
+camera.set_projection(pinhole_camera_params.intrinsic.get_focal_length(),
+                      pinhole_camera_params.intrinsic.width,
+                      pinhole_camera_params.intrinsic.height,
+                      pinhole_camera_params.intrinsic.get_principal_point())
+
 
 view_matrix = camera.get_view_matrix()
 projection_matrix = camera.get_projection_matrix()
@@ -60,6 +90,8 @@ def project_point(point, view_matrix, projection_matrix, screen_width, screen_he
     x_screen = (point_ndc[0] * 0.5 + 0.5) * screen_width
     y_screen = (1 - point_ndc[1] * 0.5 - 0.5) * screen_height
 
+    print(projection_matrix)
+    print(view_matrix)
     return x_screen, y_screen
 
 
@@ -80,6 +112,6 @@ image = cv2.imread("rendered_image.png")
 image = cv2.rectangle(image, (int(min_x), int(min_y)), (int(max_x), int(max_y)), (0, 255, 0), 2)
 cv2.imwrite("rendered_image_with_bbox.png", image)
 
-plot_image("rendered_image_with_bbox.png")
 print("Saving image at final.png")
-exit(0)
+
+plot_image("rendered_image_with_bbox.png")

@@ -20,26 +20,28 @@ bbox = utils.convert_bbox_to_o3d_format(bbox, center_type=True)
 bbox_corners = np.asarray(bbox.get_box_points())
 
 vis = o3d.visualization.Visualizer()
-vis.create_window(visible=True, height=1080, width=1920)
+vis.create_window(visible=False, height=1080, width=1920)
 vis.add_geometry(pcd)
 
-axis = o3d.geometry.TriangleMesh().create_coordinate_frame(size=1, origin=[0, 0, 0])
-vis.add_geometry(axis)
+# axis = o3d.geometry.TriangleMesh().create_coordinate_frame(size=1, origin=[0, 0, 0])
+# vis.add_geometry(axis)
+
+
 
 # 设置摄像头参数
 ctr: o3d.visualization.ViewControl = vis.get_view_control()
 
-# camera_pose = np.array([-2, -2, 1.6])
-# camera_lookat = np.array([1, 1, 1.6])
-camera_pose = np.array([-2.5, 1.3, 1.6])
-camera_lookat = np.array([2, 1.3, 1.6])
-up = np.array([0, 0, 1])
-front_vector = camera_pose - camera_lookat
+camera_pos = np.array([-2, -2, 0.5])
+camera_lookat = np.array([1, 1.5, 1.6])
+# camera_pose = np.array([-2.5, 1.3, 2])
+# camera_lookat = np.array([2, 1.3, 1.7])
+front_vector = camera_pos - camera_lookat
+up = utils.compute_up_vector(front_vector)
 
 ctr.set_up(up)
 ctr.set_front(front_vector)
 ctr.set_lookat(camera_lookat)
-ctr.set_zoom(0.45)
+ctr.set_zoom(0.42)
 
 # 设置渲染选项
 opt = vis.get_render_option()
@@ -69,12 +71,11 @@ if is_in_view:
 
     # 添加order
     image = utils.add_order_to_image(
-        image=image, order=2, top_left=top_left, size=(30, 40)
+        image=image, order=2, top_left=top_left, size=(30, 40), return_rgb=True
     )
 
     # 显示图像
     cv2.imshow('Image with Rectangle', image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    utils.plot_image(image)
 
 

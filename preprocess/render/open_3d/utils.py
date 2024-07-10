@@ -86,7 +86,7 @@ def plot_image(image, figsize=(20, 11), axis=False):
 
 def add_order_to_image(
         image, order, top_left, size=(50, 50), font_color=(255, 255, 255), font_size=1,
-        background_color=(0, 0, 255)
+        background_color=(0, 0, 255), return_rgb=True
 ) -> np.ndarray:
     if isinstance(image, str):
         image = cv2.imread(image)
@@ -106,41 +106,98 @@ def add_order_to_image(
     text_y = top_left[1] + (height + text_size[1]) // 2
     cv2.putText(image, text, (text_x, text_y), font, font_size, font_color, font_thickness)
 
+    if return_rgb:
+        # BGR to RGB
+        image = image[:, :, ::-1]
+
     return image
+
+def compute_up_vector(front_vector):
+    # 假设 z 轴为临时上向量
+    tentative_up = np.array([0, 0, 1])
+    # 检查前向量是否平行或接近 z 轴
+    if np.isclose(np.dot(front_vector, tentative_up), 1):
+        # 如果平行，选择一个不同的上向量，如 y 轴
+        tentative_up = np.array([0, 1, 0])
+    # 计算实际的上向量为前向量与临时上向量的叉积的叉积
+    right_vector = np.cross(tentative_up, front_vector)
+    up_vector = np.cross(front_vector, right_vector)
+    return up_vector / np.linalg.norm(up_vector)
 
 
 def project_bbox_with_pinhole_camera_parameters(
         camera_params: o3d.camera.PinholeCameraParameters,
-        bbox: o3d.geometry.AxisAlignedBoundingBox
+        bbox: o3d.geometry.AxisAlignedBoundingBox,
+        return_wherther_in_view=False
 ) -> tuple:
+    # bbox_corners = np.asarray(bbox.get_box_points())
+    # # 获取相机参数
+    # intrinsic = camera_params.intrinsic
+    # extrinsic = camera_params.extrinsic
+    #
+    # print('intrinsic', intrinsic)
+    # print('extrinsic', extrinsic)
+    #
+    # # 将 bbox 的 3D 点转换为齐次坐标
+    # bbox_points_homogeneous = np.hstack((bbox_corners, np.ones((bbox_corners.shape[0], 1))))
+    #
+    # # 将 3D 点从世界坐标系转换为相机坐标系
+    # camera_points = np.dot(extrinsic, bbox_points_homogeneous.T).T
+    #
+    # # 将相机坐标系的 3D 点转换为 2D 图像坐标
+    # fx, fy = intrinsic.get_focal_length()
+    # cx, cy = intrinsic.get_principal_point()
+    # camera_points_2d = np.zeros((camera_points.shape[0], 2))
+    #
+    # for i in range(camera_points.shape[0]):
+    #     x, y, z = camera_points[i][:3]
+    #     u = (fx * x / z) + cx
+    #     v = (fy * y / z) + cy
+    #     camera_points_2d[i] = [u, v]
+    #
+    # # 在图像上绘制2D BBox
+    # min_x, min_y = np.min(camera_points_2d, axis=0)
+    # max_x, max_y = np.max(camera_points_2d, axis=0)
+    #
+    # top_left = (int(min_x), int(min_y))
+    # bottom_right = (int(max_x), int(max_y))
+    #
+    # return top_left, bottom_right
+
+    # 计算边界盒的所有八个顶点
     bbox_corners = np.asarray(bbox.get_box_points())
-    # 获取相机参数
-    intrinsic = camera_params.intrinsic
-    extrinsic = camera_params.extrinsic
+    bbox_points = np.hstack((bbox_corners, np.ones((bbox_corners.shape[0], 1))))
 
-    # 将 bbox 的 3D 点转换为齐次坐标
-    bbox_points_homogeneous = np.hstack((bbox_corners, np.ones((bbox_corners.shape[0], 1))))
+    # 应用外参（从世界坐标到相机坐标）
+    extrinsic_matrix = camera_params.extrinsic
+    camera_coords = (extrinsic_matrix @ bbox_points.T).T[:, :3]  # 忽略最后的同质坐标1
 
-    # 将 3D 点从世界坐标系转换为相机坐标系
-    camera_points = np.dot(extrinsic, bbox_points_homogeneous.T).T
+    # 应用内参（从相机坐标到图像平面坐标）
+    intrinsic_matrix = camera_params.intrinsic.intrinsic_matrix
+    image_points = (intrinsic_matrix @ camera_coords.T).T
+    image_points[:, 0] /= image_points[:, 2]  # 归一化 x 坐标
+    image_points[:, 1] /= image_points[:, 2]  # 归一化 y 坐标
 
-    # 将相机坐标系的 3D 点转换为 2D 图像坐标
-    fx, fy = intrinsic.get_focal_length()
-    cx, cy = intrinsic.get_principal_point()
-    camera_points_2d = np.zeros((camera_points.shape[0], 2))
-
-    for i in range(camera_points.shape[0]):
-        x, y, z = camera_points[i][:3]
-        u = (fx * x / z) + cx
-        v = (fy * y / z) + cy
-        camera_points_2d[i] = [u, v]
-
-    # 在图像上绘制2D BBox
-    min_x, min_y = np.min(camera_points_2d, axis=0)
-    max_x, max_y = np.max(camera_points_2d, axis=0)
+    # 计算在图像上的边界矩形
+    min_x, min_y = np.min(image_points[:, :2], axis=0)
+    max_x, max_y = np.max(image_points[:, :2], axis=0)
 
     top_left = (int(min_x), int(min_y))
     bottom_right = (int(max_x), int(max_y))
+
+    if return_wherther_in_view:
+        # 检查边界框是否在图像内
+        in_view = all(0 <= x <= camera_params.intrinsic.width for x in [min_x, max_x]) and \
+                    all(0 <= y <= camera_params.intrinsic.height for y in [min_y, max_y])
+
+        valid_min_x, valid_max_x = max(0, min_x), min(camera_params.intrinsic.width, max_x)
+        valid_min_y, valid_max_y = max(0, min_y), min(camera_params.intrinsic.height, max_y)
+
+        if not in_view:
+            in_view = (valid_max_x - valid_min_x) * (valid_max_y - valid_min_y) >= \
+                      (max_x - min_x) * (max_y - min_y) * 0.8
+
+        return top_left, bottom_right, in_view
 
     return top_left, bottom_right
 
@@ -171,34 +228,4 @@ def project_bbox_with_view_projection_matrix(point, view_matrix, projection_matr
     return x_screen, y_screen
 
 
-def is_bbox_in_camera_view(
-        camera_params: o3d.camera.PinholeCameraParameters, bbox: o3d.geometry.AxisAlignedBoundingBox
-) -> bool:
-    # 提取相机内参和外参
-    intrinsics = camera_params.intrinsic.intrinsic_matrix
-    extrinsics = camera_params.extrinsic
 
-    # 获取包围盒的八个顶点
-    bbox_vertices = np.array(bbox.get_box_points())
-
-    # 将包围盒顶点从世界坐标系转换到相机坐标系
-    ones = np.ones((bbox_vertices.shape[0], 1))
-    bbox_vertices_homogeneous = np.hstack((bbox_vertices, ones))
-    bbox_vertices_camera = np.dot(extrinsics, bbox_vertices_homogeneous.T).T
-
-    # 将相机坐标系的顶点转换到像素坐标系
-    fx, fy = intrinsics[0, 0], intrinsics[1, 1]
-    cx, cy = intrinsics[0, 2], intrinsics[1, 2]
-
-    bbox_vertices_camera = bbox_vertices_camera[:, :3]  # 去掉齐次坐标
-    bbox_vertices_pixel = np.zeros((bbox_vertices_camera.shape[0], 2))
-    bbox_vertices_pixel[:, 0] = (bbox_vertices_camera[:, 0] * fx / bbox_vertices_camera[:, 2]) + cx
-    bbox_vertices_pixel[:, 1] = (bbox_vertices_camera[:, 1] * fy / bbox_vertices_camera[:, 2]) + cy
-
-    # 检查顶点是否在图像范围内
-    image_width, image_height = intrinsics[0, 2] * 2, intrinsics[1, 2] * 2
-    in_view = np.all((bbox_vertices_pixel[:, 0] >= 0) & (bbox_vertices_pixel[:, 0] < image_width) &
-                     (bbox_vertices_pixel[:, 1] >= 0) & (bbox_vertices_pixel[:, 1] < image_height) &
-                     (bbox_vertices_camera[:, 2] > 0))
-
-    return in_view
