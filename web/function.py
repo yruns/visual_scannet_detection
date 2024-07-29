@@ -5,7 +5,7 @@ import numpy as np
 import gradio as gr
 
 from utils import agent, logger
-from utils.comm import TempFile, process_2d_text_table
+from utils.comm import TempFile, process_2d_text_table, process_text_indices
 from utils import constants as const
 from utils.convertor import convert_hex_to_rgb, ply_to_obj
 from utils.visual import create_scene_with_bbox
@@ -13,7 +13,7 @@ from utils import scannet as scannet_utils
 
 
 def select_scene(session_state, scene_name):
-    logger.info("Selected scene:", scene_name)
+    logger.info(f"Selected scene: {scene_name}")
     scene_name = os.path.join(const.examples_path, scene_name, f"{const.prettify_prefix}{scene_name}_vh_clean_2.obj")
     session_state[const.original_scene_path] = scene_name
 
@@ -48,7 +48,7 @@ def upload_scene(session_state, scene_file):
 def download_scene(current_scene_path, download_btn):
     if download_btn is None:
         gr.Warning("Now there is no scene to download.")
-    logger.info("Downloaded scene file:", current_scene_path)
+    logger.info(f"Downloaded scene file: {current_scene_path}")
     return (
         current_scene_path
     )
@@ -91,12 +91,17 @@ def clear_add_box(session_state, *bbox_params):
         *bbox_params_return
     )
 
-def submit_bbox_params(session_state, bbox_color, bbox_line_width, bbox_numpy_file, checkgroup,
-                       bbox_text, camera_pos, camera_lookat, render_checkgroup, btn_id):
+def submit_bbox_params(
+        session_state, bbox_color, bbox_line_width, bbox_numpy_file, bbox_indices, checkgroup,
+        bbox_text, camera_pos, camera_lookat, render_checkgroup, btn_id
+):
     # 读取bbox_numpy_file文件
     bbox_numpy, axis_align_matrix = None, None
     if bbox_numpy_file is not None:
         bbox_numpy = np.load(bbox_numpy_file)[:, :6]
+        if bbox_indices != "":
+            bbox_indices = np.array(process_text_indices(bbox_indices))
+            bbox_numpy = bbox_numpy[bbox_indices]
         agent.add_temp_file(TempFile(bbox_numpy_file))
 
     if const.axis_aligned_option in checkgroup:
@@ -178,6 +183,7 @@ def clear_bbox_params(session_state, clear_btn_id):
         const.default_checkgroup_options,
         const.bbox_color,
         const.bbox_line_width,
+        None,
         None,
         None,
         None,

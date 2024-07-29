@@ -13,6 +13,8 @@ mesh_vertices = np.asarray(pcd.vertices)
 aligned_vertices = utils.align_point_vertices(mesh_vertices, axis_align_matrix)
 pcd.vertices = o3d.utility.Vector3dVector(aligned_vertices)
 
+pcd.compute_vertex_normals()
+
 # Add BBox
 bbox = np.array([1.48, 3.52, 1.85, 1.74, 0.231, 0.572])
 center = bbox[:3]

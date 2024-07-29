@@ -9,6 +9,7 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import open3d as o3d
+from typing import List, Tuple, Union
 
 
 def align_point_vertices(mesh_vertices, axis_align_matrix):
@@ -71,6 +72,33 @@ def cylinder_frame(p0, p1):
     transformation = np.matmul(transformation, scaling)
     return transformation
 
+class Convertor(object):
+
+    @staticmethod
+    def convert_bbox_to_o3d_format(bbox: Union[List, np.ndarray], center_type=True) -> o3d.geometry.AxisAlignedBoundingBox:
+        if isinstance(bbox, List):
+            bbox = np.array(bbox)
+        if center_type:
+            center, size = bbox[:3], bbox[3:]
+            # Create an o3d.geometry.AxisAlignedBoundingBox object
+            return o3d.geometry.AxisAlignedBoundingBox(
+                min_bound=np.array(center) - np.array(size) / 2,
+                max_bound=np.array(center) + np.array(size) / 2
+            )
+
+        return o3d.geometry.AxisAlignedBoundingBox(min_bound=bbox[:3], max_bound=bbox[3:])
+
+    @staticmethod
+    def convert_o3d_image_to_cv2_image(
+            image: o3d.geometry.Image,
+    ) -> np.ndarray:
+        # Convert the Open3D image to a NumPy array and x255
+        image_np = (np.asarray(image) * 255).astype(np.uint8)
+        # Convert the image from OpenCV BGR format to RGB format
+        image_np = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
+
+        return image_np
+
 
 def plot_image(image, figsize=(20, 11), axis=False):
     plt.figure(figsize=figsize)
@@ -127,9 +155,9 @@ def compute_up_vector(front_vector):
 
 def project_bbox_with_pinhole_camera_parameters(
         camera_params: o3d.camera.PinholeCameraParameters,
-        bbox: o3d.geometry.AxisAlignedBoundingBox,
+        bboxes: Union[o3d.geometry.AxisAlignedBoundingBox, List[o3d.geometry.AxisAlignedBoundingBox]],
         return_wherther_in_view=False
-) -> tuple:
+) -> Union[List[Tuple], Tuple]:
     # bbox_corners = np.asarray(bbox.get_box_points())
     # # 获取相机参数
     # intrinsic = camera_params.intrinsic
@@ -164,8 +192,14 @@ def project_bbox_with_pinhole_camera_parameters(
     #
     # return top_left, bottom_right
 
+    if isinstance(bboxes, List):
+        return [
+            project_bbox_with_pinhole_camera_parameters(camera_params, bbox, return_wherther_in_view)
+            for bbox in bboxes
+        ]
+
     # 计算边界盒的所有八个顶点
-    bbox_corners = np.asarray(bbox.get_box_points())
+    bbox_corners = np.asarray(bboxes.get_box_points())
     bbox_points = np.hstack((bbox_corners, np.ones((bbox_corners.shape[0], 1))))
 
     # 应用外参（从世界坐标到相机坐标）
@@ -202,16 +236,7 @@ def project_bbox_with_pinhole_camera_parameters(
     return top_left, bottom_right
 
 
-def convert_bbox_to_o3d_format(bbox: np.ndarray, center_type=True) -> o3d.geometry.AxisAlignedBoundingBox:
-    if center_type:
-        center, size = bbox[:3], bbox[3:]
-        # Create an o3d.geometry.AxisAlignedBoundingBox object
-        return o3d.geometry.AxisAlignedBoundingBox(
-            min_bound=np.array(center) - np.array(size) / 2,
-            max_bound=np.array(center) + np.array(size) / 2
-        )
 
-    return o3d.geometry.AxisAlignedBoundingBox(min_bound=bbox[:3], max_bound=bbox[3:])
 
 
 def project_bbox_with_view_projection_matrix(point, view_matrix, projection_matrix, screen_width, screen_height):

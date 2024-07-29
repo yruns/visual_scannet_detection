@@ -113,16 +113,23 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=const.theme, css=open("
                                                     scale=1)
                                                 with gr.Accordion(label="Examples for bbox numpy file:",
                                                                   open=False):
-                                                    gr.Examples(
-                                                        examples=[
-                                                            choice.replace("vh_clean_2.obj",
-                                                                           "aligned_bbox.npy").replace(
-                                                                const.prettify_prefix, "")
-                                                            for choice in scene_choice
-                                                        ],
-                                                        inputs=bbox_numpy_file,
+                                                    with gr.Column():
+                                                        # bbox的索引集
+                                                        bbox_indices = gr.Textbox(label="Bbox Indexes", lines=1,
+                                                                                  scale=1,
+                                                                                  placeholder="bbox indexes, eg. 0,1,2")
+                                                        gr.Examples(
+                                                            examples=[
+                                                                choice.replace("vh_clean_2.obj",
+                                                                               "aligned_bbox.npy").replace(
+                                                                    const.prettify_prefix, "")
+                                                                for choice in scene_choice
+                                                            ],
+                                                            inputs=bbox_numpy_file,
 
-                                                    )
+
+                                                        )
+
 
                                     with gr.Tab("Textbox"):
                                         # bbox表格
@@ -218,7 +225,7 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=const.theme, css=open("
     submit_button.click(
         fn=partial(bind_func.submit_bbox_params, btn_id='tab1'),
         inputs=[session_state, bbox_color_picker, bbox_line_width_slider,
-                bbox_numpy_file, checkgroup, bbox_text, camera_pos, camera_lookat, render_checkgroup],
+                bbox_numpy_file, bbox_indices, checkgroup, bbox_text, camera_pos, camera_lookat, render_checkgroup],
         outputs=[session_state, model_3d, download_button, projection],
     )
 
@@ -234,7 +241,7 @@ with gr.Blocks(title="Visual ScanNet's Detection", theme=const.theme, css=open("
         fn=partial(bind_func.clear_bbox_params, clear_btn_id="tab1"),
         inputs=[session_state, ],
         outputs=[session_state, model_3d, download_button, checkgroup, bbox_color_picker, bbox_line_width_slider,
-                 bbox_numpy_file, bbox_text, camera_pos, camera_lookat, projection, render_checkgroup],
+                 bbox_numpy_file, bbox_indices, bbox_text, camera_pos, camera_lookat, projection, render_checkgroup],
     )
 
     # clear_button2.click(

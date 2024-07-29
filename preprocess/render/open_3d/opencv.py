@@ -1,38 +1,52 @@
-import cv2
-import numpy as np
+import os
+import requests
 
-import utils
+API_KEY = 'wx1pxqifjt4uxy2ru'
+IMAGE_FILE_PATH = '/Users/yruns/Downloads/view_3.png'
 
-# 创建一个空白图像
-image = np.zeros((500, 500, 3), dtype="uint8")
+def main():
+    assert os.path.exists(IMAGE_FILE_PATH), f'Error: File({IMAGE_FILE_PATH}) does not exist.'
 
-image = utils.add_order_to_image(
-    image=image, order=1, top_left=(100, 100), size=(100, 50)
-)
+    headers = {'X-API-KEY': API_KEY}
+    data = {'sync': '1'}
+    files = {'image_file': open(IMAGE_FILE_PATH, 'rb')}
+    url = 'https://techsz.aoscdn.com/api/tasks/visual/scale'
 
-# # 定义颜色块的位置和尺寸
-# top_left_corner = (100, 100)  # 矩形左上角坐标
-# width, height = 100, 50       # 矩形的宽度和高度
-# bottom_right_corner = (top_left_corner[0] + width, top_left_corner[1] + height)
-#
-# # 定义颜色块的颜色和填充
-# rectangle_color = (0, 0, 255)  # BGR格式的红色
-#
-# # 在图像上画一个矩形作为颜色块
-# cv2.rectangle(image, top_left_corner, bottom_right_corner, rectangle_color, -1)  # -1 表示填充矩形
-#
-# # 添加数字
-# font = cv2.FONT_HERSHEY_SIMPLEX
-# text = "5"
-# font_scale = 1
-# font_color = (255, 255, 255)  # 白色
-# font_thickness = 2
-# text_size = cv2.getTextSize(text, font, font_scale, font_thickness)[0]
-# text_x = top_left_corner[0] + (width - text_size[0]) // 2
-# text_y = top_left_corner[1] + (height + text_size[1]) // 2
-# cv2.putText(image, text, (text_x, text_y), font, font_scale, font_color, font_thickness)
+    # Create a task
+    response = requests.post(url, headers=headers, data=data, files=files)
 
-# 显示图像
-cv2.imshow('Image with Colored Block and Number', image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    response_json = response.json()
+    if 'status' in response_json and response_json['status'] == 200:
+        result_tag = 'failed'
+        if 'data' in response_json:
+            response_json_data = response_json['data']
+            if 'state' in response_json_data:
+                task_state = response_json_data['state']
+                # task success
+                if task_state == 1:
+                    result_tag = 'successful'
+                    # save image
+                    image_url = response_json_data['image']
+
+                    response = requests.get(image_url)
+
+                    with open('views/output.png', 'wb') as f:
+                        f.write(response.content)
+
+                elif task_state < 0:
+                    # request failed, log the details
+                    pass
+                else:
+                    # Task processing, abnormal situation, seeking assistance from customer service of picwish
+                    pass
+        print(f'Result({result_tag}): {response_json}')
+        print(response_json)
+
+
+
+    else:
+        # request failed, log the details
+        print(f'Error: Failed to get the result,{response.text}')
+
+if __name__ == "__main__":
+    main()

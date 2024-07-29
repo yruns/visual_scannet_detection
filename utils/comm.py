@@ -70,6 +70,18 @@ def generate_hash(*args):
     # 返回哈希值的十六进制表示
     return hash_object.hexdigest()
 
+def process_text_indices(bbox_indices: str):
+    if bbox_indices.isnumeric():
+        return [int(bbox_indices)]
+    elif bbox_indices.startswith("[") and bbox_indices.endswith("]"):
+        bbox_indices = bbox_indices.strip("[]")
+        if "," in bbox_indices:
+            return [int(i) for i in bbox_indices.split(",")]
+        else:
+            return [int(i) for i in bbox_indices.split()]
+    else:
+        return []
+
 
 def process_2d_text_table(printed_array):
     if printed_array.count("[") == 1:
